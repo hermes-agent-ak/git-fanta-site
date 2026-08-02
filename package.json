@@ -1,0 +1,49 @@
+{
+  "name": "git-fanta-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.4.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write package.json tsconfig.json astro.config.mjs eslint.config.mjs playwright.config.ts vitest.config.ts src tests .github/workflows/ci.yml",
+    "format:check": "prettier --check package.json tsconfig.json astro.config.mjs eslint.config.mjs playwright.config.ts vitest.config.ts src tests .github/workflows/ci.yml",
+    "test": "pnpm test:unit && pnpm test:e2e",
+    "test:unit": "vitest run",
+    "test:e2e": "pnpm build && playwright test",
+    "test:a11y": "pnpm build && playwright test --grep @a11y"
+  },
+  "dependencies": {
+    "@astrojs/react": "^4.3.0",
+    "astro": "^7.1.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.10.2",
+    "@eslint/js": "^9.0.0",
+    "@playwright/test": "^1.62.0",
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-astro": "^1.5.0",
+    "globals": "^16.0.0",
+    "prettier": "^3.6.0",
+    "prettier-plugin-astro": "^0.14.1",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^6.0.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^3.2.0"
+  }
+}
