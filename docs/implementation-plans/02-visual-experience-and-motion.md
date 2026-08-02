@@ -71,13 +71,19 @@ pretend to be live repository data or replace ordinary content navigation.
   it, and CSS consumes the same attribute.
 - `branchline-enhancement.ts` adds click synchronization and one bounded
   `IntersectionObserver` for normal scrolling. It is 1,398 source bytes and
-  never replaces native navigation.
+  never replaces native navigation. Its state transitions are covered through
+  an injected root/view contract, while browser wiring remains covered by
+  Playwright.
 - `GitTreeReveal.astro` and `CommitMarker.astro` remain decorative and have no
   independent navigation-active state.
 - The decision log documents state ownership, rejected alternatives, and the
   performance/accessibility translation of the focused reference research.
-- The implementation passes 11 unit tests, 13 browser tests, 3 Axe-tagged
-  tests, formatting, lint, type-check, build, and diff validation.
+- The implementation passes 14 unit tests, 13 browser tests, 3 Axe-tagged
+  tests, formatting, lint, type-check, build, and diff validation. The
+  SonarQube workflow generates and imports LCOV coverage before analysis;
+  declarative Astro/CSS repetition is excluded from copy-paste detection while
+  TypeScript source remains measured. The local coverage run reports 96.13%
+  line coverage.
 
 ## Scope
 
@@ -233,8 +239,10 @@ logo, release data, or unsupported product claim.
   hover-only content, or navigation that requires JavaScript.
 - Do not replace BaseLayout, siteHref, the shared navigation contract, or the
   Phase 1 accessibility rules.
-- Do not change the Git Fanta application repository, GitHub Actions, release
-  API, deployment workflow, or SonarQube trust boundary.
+- Do not change the Git Fanta application repository, release API, or
+  deployment workflow. The SonarQube coverage handoff in
+  `.github/workflows/build.yml` and its explicit source/test boundaries are
+  allowed; the existing SonarQube trust boundary remains unchanged.
 - Do not add pixel-perfect snapshot tests or treat award references as assets to
   copy.
 
@@ -275,6 +283,8 @@ logo, release data, or unsupported product claim.
   observer enhancement that keeps the visual marker synchronized after clicks
   and during normal scrolling.
 - `tests/unit/experience-sections.test.ts` — section model and ref policy tests.
+- `tests/unit/branchline-enhancement.test.ts` — injected DOM/view state tests
+  for click and observer synchronization.
 - `tests/e2e/visual-experience.spec.ts` — browser, keyboard, responsive, motion,
   fallback, and accessibility coverage.
 
@@ -290,6 +300,13 @@ logo, release data, or unsupported product claim.
   labelled temporary sections.
 - `tests/e2e/bootstrap.spec.ts` — preserve the compatibility smoke assertions
   or move equivalent coverage without weakening it.
+- `package.json` and `pnpm-lock.yaml` — add the V8 coverage provider and the
+  coverage test script.
+- `vitest.config.ts` — scope LCOV generation to measured TypeScript source.
+- `sonar-project.properties` — declare source/test boundaries, LCOV import,
+  and presentation-layer copy-paste exclusions.
+- `.github/workflows/build.yml` — install dependencies and generate coverage
+  before the trusted SonarQube scan.
 - `docs/implementation-plans/01-design-system-and-layout.md` — only if the
   Phase 1 follow-up contract needs a factual completion note.
 
@@ -445,6 +462,7 @@ Run commands from the repository root on the Phase 2 branch.
     pnpm lint
     pnpm check
     pnpm test:unit
+    pnpm test:unit:coverage
     pnpm test:e2e
     pnpm test:a11y
     pnpm build
@@ -596,6 +614,9 @@ dependency for this phase.
 - Normal anchors, keyboard navigation, focus indicators, mobile behavior, Axe,
   reduced motion, and static fallbacks pass.
 - The performance budgets and no-live-Git-data boundary pass review.
+- SonarQube receives LCOV coverage from the trusted analysis workflow and the
+  configured new-code quality gate remains green without weakening TypeScript
+  coverage measurement.
 - Phase 3 can consume the visual system without a layout rewrite.
 - The plan is changed from planned to complete only after all acceptance criteria
   and review gates pass.

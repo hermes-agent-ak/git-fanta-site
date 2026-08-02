@@ -545,6 +545,12 @@ Additional expectations:
 * no large component library
 * no full GitHub Primer CSS dependency
 
+SonarQube analysis must receive an LCOV report generated in the trusted build
+workflow. Source and test boundaries must be explicit; declarative Astro/CSS
+presentation repetition may be excluded from copy-paste detection, but typed
+application logic must remain covered by tests. The new-code quality gate is a
+release-blocking check.
+
 A small icon package is acceptable, but do not import an entire UI framework for a few icons.
 
 ## 15. Repository quality requirements
@@ -616,6 +622,10 @@ Create a pull-request CI workflow that performs:
 6. production build
 7. Playwright smoke tests
 8. accessibility tests
+
+The trusted SonarQube workflow runs the unit coverage command before analysis
+and imports `coverage/lcov.info`; it must not rely on a dashboard-side default
+or on a locally generated, untracked report.
 
 Use concurrency cancellation for superseded pull-request runs.
 
