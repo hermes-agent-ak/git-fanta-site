@@ -4,7 +4,10 @@ The official website for [Git Fanta](https://github.com/hermes-agent-ak/git-fant
 
 This repository is intentionally separate from the Python/Qt application repository. It contains the website, its static-build tooling, its tests, and its deployment configuration.
 
-The project is currently in the planning and bootstrap stage. The architectural source of truth is the [Master Planning and Implementation Brief](docs/master-planning-and-implementation-brief.md).
+The project is in the bootstrap stage. Phase 0 now provides the Node/pnpm toolchain, static Astro
+shell, base-path-safe URL helper, baseline CI and layered unit/build/E2E accessibility checks. The
+architectural source of truth is the [Master Planning and Implementation Brief](docs/master-planning-and-implementation-brief.md),
+and the bootstrap decisions are recorded in the [Phase 0 plan](docs/implementation-plans/00-project-bootstrap.md).
 
 ## Why this architecture
 
@@ -151,7 +154,7 @@ The project is designed for Bash on Xubuntu and should remain comfortable on mod
 - Chromium is sufficient for the default local Playwright command;
 - normal development and production builds should remain comfortably below 2 GB of memory.
 
-Once the bootstrap phase is implemented, the expected commands will be:
+The available development and verification commands are:
 
 ```bash
 corepack enable

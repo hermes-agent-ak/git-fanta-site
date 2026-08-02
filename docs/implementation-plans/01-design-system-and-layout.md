@@ -13,11 +13,11 @@ This plan also defines an optional SonarQube quality lane from the beginning of 
 - The repository currently contains the initial documentation commit 64fa865 on main.
 - dev has been created from main and pushed as the shared integration branch.
 - feature/phase-1-design-system-and-layout has been created from dev for this plan.
-- Before the current onboarding step, the repository contained README.md and docs/master-planning-and-implementation-brief.md only. No package.json, Astro source tree, stylesheet, component library, or test suite exists yet; the two SonarQube onboarding files are now the only CI-related additions.
-- SonarQube Community Build has now been configured manually for the website project. The project was imported through the GitHub integration, and the onboarding generated `.github/workflows/build.yml` plus `sonar-project.properties`.
-- The generated SonarQube workflow is a bootstrap artifact, not yet the final CI design: it currently targets a GitHub-hosted runner and therefore cannot reach the owner's local `http://localhost:9000` instance. The final local setup requires an explicitly trusted self-hosted runner or a different reachable server mode.
+- Phase 0 has now created `package.json`, the Astro source tree, global stylesheet, test structure, baseline CI and the frozen dependency lockfile. Its decisions are recorded in `docs/implementation-plans/00-project-bootstrap.md`.
+- SonarQube Community Build has been configured manually for the website project. The project was imported through the GitHub integration, and the tracked workflow plus `sonar-project.properties` have been tested successfully on the trusted local runner.
+- The SonarQube workflow remains an optional quality lane, separate from baseline CI. It is restricted to the documented trust boundary and must not become a prerequisite for contributors who cannot reach the local server.
 - The SonarQube project key in `sonar-project.properties` is a public project identifier, not a credential. A different SonarQube instance may use a different project key; the plan must never assume that an instance-specific key is portable across servers.
-- The Phase 0 bootstrap plan is a prerequisite. It is expected to create the Astro project, strict TypeScript configuration, Tailwind CSS 4 Vite integration, React integration, package scripts, and the initial source/test directories.
+- The Phase 0 bootstrap plan is complete. Phase 1 may now consume its Astro project, strict TypeScript configuration, Tailwind CSS 4 Vite integration, React integration, package scripts, base-path helper and test commands.
 - The approved architecture is static Astro output. Static sections must remain Astro components; React may be used only for a genuinely interactive island in a later phase.
 - The user has a local SonarQube instance at http://localhost:9000. This is a local development capability, not a credential or a CI endpoint. A GitHub-hosted runner cannot reach a developer's localhost.
 - No product screenshots, logo assets, release data, or final page content should be invented in this phase. Content and product assets belong to later plans.
@@ -65,7 +65,11 @@ The current optional path uses SonarQube Community Build on the developer-contro
 | Workflow trust boundary | SonarQube analysis runs only on trusted pushes to protected branches and/or explicit manual dispatch; it is not run on arbitrary fork pull requests | A public repository must not allow untrusted pull-request code to execute on a runner that can access a local network service or long-lived credentials. |
 | Repository files | `.github/workflows/build.yml` and `sonar-project.properties` are tracked; neither contains a token or private key | The workflow and scanner project identity are reproducible configuration. Secrets belong in GitHub/SonarQube credential stores, not in Git history. |
 
-The generated onboarding workflow is retained as the initial configuration record. Before it is treated as an operational CI lane, Phase 5 must replace `ubuntu-latest` with an explicitly approved runner label for the local mode, restrict its triggers to the documented trust boundary, and make the quality-gate behavior explicit. The baseline PR checks remain independent of SonarQube so contributors can work without access to the local server.
+The generated onboarding workflow has been hardened into the current optional quality lane: it
+uses the approved trusted self-hosted runner label, restricts execution at the job boundary, and
+enforces the SonarQube quality gate. The baseline PR checks in `ci.yml` remain independent from
+SonarQube so contributors can work without access to the local server. Later quality work may add
+post-scan artifact/secret auditing, but it must preserve this trust boundary.
 
 ## Explicit non-scope
 
@@ -289,8 +293,8 @@ This work can proceed in parallel with Steps 2–6 after the Phase 0 CI workflow
 4. Configure `SONAR_HOST_URL` as runtime configuration. A repository variable is preferred because the URL is not a credential; the generated onboarding workflow may use a secret reference, which is acceptable if the owner has already configured it there. In local mode the value is `http://localhost:9000`, but it must resolve from the runner rather than from the developer's browser.
 5. For the free localhost mode, manually register a repository-level Linux x86_64 self-hosted runner on the trusted machine. Verify that it can make outbound HTTPS connections to GitHub and reach the local SonarQube service. Do not expose port 9000 through an unauthenticated tunnel.
 6. Restrict the local SonarQube workflow to trusted pushes to protected `dev`/`main` branches and explicit `workflow_dispatch`. Do not run this self-hosted job for arbitrary fork pull requests. Keep normal pull-request checks on GitHub-hosted runners independent from the local SonarQube service.
-7. Replace the generated `ubuntu-latest` runner with the approved self-hosted label only when the runner is registered and the trust boundary is documented. Keep the scanner action pinned to a stable immutable reference and retain `fetch-depth: 0` for analysis history.
-8. Add the final SonarQube job only after the Phase 0 workflow exists. The job must:
+7. The current workflow already uses the registered approved self-hosted label and documented trust boundary. Keep the scanner action pinned to a stable immutable reference and retain `fetch-depth: 0` for analysis history.
+8. Keep the SonarQube job separate from the baseline Phase 0 workflow. It must:
    - run after checkout, Node 24 setup, pnpm installation, dependency installation, and the relevant project checks;
    - use configured `SONAR_HOST_URL` and masked `SONAR_TOKEN` inputs;
    - fail clearly if required configuration is absent when the trusted-branch job is enabled;
