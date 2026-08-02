@@ -70,6 +70,17 @@ export const experienceSections = [
   },
 ] as const satisfies readonly ExperienceSection[];
 
+export function resolveExperienceSectionId(
+  sections: readonly ExperienceSection[],
+  requestedId?: string,
+): string | undefined {
+  if (requestedId && sections.some((section) => section.id === requestedId)) {
+    return requestedId;
+  }
+
+  return sections[0]?.id;
+}
+
 export const motionIntents = [
   {
     name: "commit-resolve",
