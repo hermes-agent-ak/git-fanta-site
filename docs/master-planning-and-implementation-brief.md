@@ -810,6 +810,17 @@ Add GitHub Pages configuration and deployment workflow. Verify project-subpath r
 
 Update the Git Fanta release workflow to dispatch a website rebuild after a release is published. Update the Git Fanta README and repository metadata to point to the new website only after the site is live.
 
+### Current implementation status
+
+- Phase 0 — bootstrap: complete and merged into `dev`.
+- Phase 1 — design foundation: complete and merged into `dev`.
+- Phase 2 — visual experience and motion: implemented and validated on
+  `feature/phase-2-visual-experience-and-motion`; its Branchline state contract,
+  decorative graph boundary, and performance budget are documented in the Phase
+  2 plan and decision log.
+- Phase 3 — content and product assets: planned next, with its branch based on
+  the completed Phase 2 branch.
+
 ## 20. Codex operating instructions
 
 First inspect the local repositories and report material differences from this brief.

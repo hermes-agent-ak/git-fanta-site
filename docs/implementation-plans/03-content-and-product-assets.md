@@ -35,6 +35,12 @@ invented image or unsupported product claim.
   site-header outputs are prerequisites for the small shell integration in this
   phase. Phase 3 must not be implemented against a missing Phase 1 or Phase 2
   visual contract.
+- Phase 2 is complete on
+  feature/phase-2-visual-experience-and-motion. It provides the Branchline
+  anchors, readonly experience model, decorative Git Tree primitives, reduced
+  motion fallbacks, and the bounded active-section enhancement. Phase 3 must
+  consume those contracts and replace only the temporary content, not the
+  visual navigation or layout foundation.
 - The application repository's authoritative product sources are README.md,
   docs/git-fanta.rst, and docs/git-fanta-dag.rst. The README identifies Git
   Fanta as a Git GUI, describes it as a fork of git-cola, and states that it
