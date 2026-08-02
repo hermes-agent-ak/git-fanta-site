@@ -8,10 +8,9 @@ interface Props {
   node: ExperienceNode;
   tone: ExperienceTone;
   decorative?: boolean;
-  active?: boolean;
 }
 
-const { node, tone, decorative = true, active = false } = Astro.props;
+const { node, tone, decorative = true } = Astro.props;
 ---
 
 <span
@@ -21,5 +20,4 @@ const { node, tone, decorative = true, active = false } = Astro.props;
     `commit-marker--${tone}`,
   ]}
   data-commit-marker
-  data-active={active ? "true" : undefined}
   aria-hidden={decorative ? "true" : undefined}></span>
