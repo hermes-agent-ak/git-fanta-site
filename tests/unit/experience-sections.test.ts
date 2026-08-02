@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   experienceSections,
   motionIntents,
+  resolveExperienceSectionId,
 } from "../../src/lib/experience-sections";
 
 describe("experience section model", () => {
@@ -36,6 +37,15 @@ describe("experience section model", () => {
       expect(nodes.has(section.node)).toBe(true);
       expect(tones.has(section.tone)).toBe(true);
     }
+  });
+
+  it("falls back to the first section when an active id is invalid", () => {
+    expect(resolveExperienceSectionId(experienceSections, "motion")).toBe(
+      "motion",
+    );
+    expect(
+      resolveExperienceSectionId(experienceSections, "not-a-section"),
+    ).toBe("foundation");
   });
 
   it("declares bounded motion intents with reduced-motion fallbacks", () => {

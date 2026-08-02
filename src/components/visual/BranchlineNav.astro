@@ -1,12 +1,16 @@
 ---
-import type { ExperienceSection } from "../../lib/experience-sections";
+import {
+  resolveExperienceSectionId,
+  type ExperienceSection,
+} from "../../lib/experience-sections";
 
 interface Props {
   sections: readonly ExperienceSection[];
   currentId?: string;
 }
 
-const { sections, currentId = sections[0]?.id } = Astro.props;
+const { sections, currentId } = Astro.props;
+const activeId = resolveExperienceSectionId(sections, currentId);
 
 function shortRef(ref: string): string {
   return ref.replace("refs/heads/", "");
@@ -27,15 +31,12 @@ function shortRef(ref: string): string {
       <ol class="branchline-nav__list">
         {
           sections.map((section) => {
-            const isCurrent = section.id === currentId;
+            const isCurrent = section.id === activeId;
 
             return (
               <li class="branchline-nav__item">
                 <a
-                  class:list={[
-                    "branchline-nav__link",
-                    isCurrent && "branchline-nav__link--active",
-                  ]}
+                  class="branchline-nav__link"
                   href={section.href}
                   aria-label={section.ariaLabel}
                   aria-current={isCurrent ? "location" : undefined}

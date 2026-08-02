@@ -19,14 +19,26 @@ test.describe("Branchline visual experience", () => {
     await expect(links.nth(0)).toHaveAttribute("aria-current", "location");
     await expect(links.nth(0)).toHaveAttribute("data-active", "true");
     await expect(links.nth(4)).toHaveAttribute("href", "#handoff");
+    await expect(branchline.locator('[data-active="true"]')).toHaveCount(1);
+    await expect(branchline.locator('[aria-current="location"]')).toHaveCount(
+      1,
+    );
 
-    await links.nth(2).click();
-    await expect(page).toHaveURL(`${basePath}#git-tree`);
+    for (let index = 1; index < (await links.count()); index += 1) {
+      const link = links.nth(index);
+      const href = await link.getAttribute("href");
+
+      await link.click();
+      await expect(page).toHaveURL(`${basePath}${href}`);
+      await expect(branchline.locator('[data-active="true"]')).toHaveCount(1);
+      await expect(branchline.locator('[aria-current="location"]')).toHaveCount(
+        1,
+      );
+      await expect(link).toHaveAttribute("data-active", "true");
+      await expect(link).toHaveAttribute("aria-current", "location");
+    }
+
     await expect(page.locator("#git-tree")).toBeVisible();
-    await expect(links.nth(2)).toHaveAttribute("aria-current", "location");
-    await expect(links.nth(2)).toHaveAttribute("data-active", "true");
-    await expect(links.nth(0)).toHaveAttribute("data-active", "false");
-    await expect(links.nth(0)).not.toHaveAttribute("aria-current", "location");
   });
 
   test("renders a decorative graph that does not carry semantic content", async ({

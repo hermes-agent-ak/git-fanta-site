@@ -7,11 +7,13 @@ if (nav) {
   const sections = links
     .map((link) => document.getElementById(link.hash.slice(1)))
     .filter((section): section is HTMLElement => section !== null);
+  const sectionIds = new Set(sections.map((section) => section.id));
 
   const setActive = (id: string) => {
+    if (!sectionIds.has(id)) return;
+
     links.forEach((link) => {
       const isActive = link.hash.slice(1) === id;
-      link.classList.toggle("branchline-nav__link--active", isActive);
       link.dataset.active = String(isActive);
 
       if (isActive) {

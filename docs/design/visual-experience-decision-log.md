@@ -27,6 +27,23 @@ small named systems:
 Each system has one primary component contract, a semantic fallback, and a
 bounded CSS surface.
 
+## State ownership
+
+The active Branchline state has one deliberate owner at each boundary:
+
+1. `experienceSections` is the only source for IDs, hrefs, labels, and refs.
+2. `resolveExperienceSectionId` validates the server-rendered initial state and
+   falls back to the first known section when a caller supplies an invalid ID.
+3. `data-active` is the single client-side visual state consumed by CSS. The
+   enhancement updates it for the clicked or observed section and never
+   maintains a second active CSS class.
+4. `aria-current="location"` mirrors that same state for assistive technology;
+   exactly one active link is enforced by the browser contract test.
+
+This keeps the static render, progressive enhancement, styling, and automated
+assertions on one state contract. If JavaScript is unavailable, the validated
+server-rendered first node remains a complete navigation fallback.
+
 ## Interaction decisions
 
 ### Normal anchors remain the source of truth

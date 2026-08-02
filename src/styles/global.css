@@ -274,13 +274,13 @@ button:disabled {
 }
 
 .branchline-nav__link:hover,
-.branchline-nav__link--active {
+.branchline-nav__link[data-active="true"] {
   border-color: var(--gf-color-border-strong);
   color: var(--gf-color-foreground-primary);
   background: var(--gf-color-background-elevated);
 }
 
-.branchline-nav__link--active {
+.branchline-nav__link[data-active="true"] {
   box-shadow: inset 0 -2px 0 var(--gf-color-branchline);
 }
 
@@ -311,7 +311,7 @@ button:disabled {
   color: var(--gf-color-foreground-subtle);
 }
 
-.branchline-nav__link--active .branchline-nav__node {
+.branchline-nav__link[data-active="true"] .branchline-nav__node {
   box-shadow: 0 0 0 0.25rem rgb(242 140 40 / 0.18);
   background: currentColor;
 }
