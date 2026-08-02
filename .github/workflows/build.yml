@@ -1,15 +1,20 @@
 name: Build
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
 
+permissions:
+  contents: read
 
 jobs:
   build:
     name: Build and analyze
-    runs-on: ubuntu-latest
+    # This job intentionally runs only on the trusted local runner so it can
+    # reach the private SonarQube instance at http://localhost:9000.
+    runs-on: [self-hosted, linux, x64, sonarqube-local]
 
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
