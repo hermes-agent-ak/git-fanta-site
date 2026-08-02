@@ -1,14 +1,16 @@
 ---
 status: planned
-phase: 2
+phase: 3
 depends_on:
   - docs/implementation-plans/01-design-system-and-layout.md
+  - docs/implementation-plans/02-visual-experience-and-motion.md
 source_repository: hermes-agent-ak/git-fanta
-implementation_branch: feature/phase-2-content-and-product-assets
+implementation_branch: feature/phase-3-content-and-product-assets
+base_branch: feature/phase-2-visual-experience-and-motion
 target_branch: dev
 ---
 
-# Phase 2 Implementation Plan — Content and Product Assets
+# Phase 3 Implementation Plan — Content and Product Assets
 
 ## Objective
 
@@ -31,7 +33,8 @@ invented image or unsupported product claim.
 - Phase 1 is specified in
   docs/implementation-plans/01-design-system-and-layout.md. Its layout and
   site-header outputs are prerequisites for the small shell integration in this
-  phase. Phase 2 must not be implemented against a missing Phase 1 contract.
+  phase. Phase 3 must not be implemented against a missing Phase 1 or Phase 2
+  visual contract.
 - The application repository's authoritative product sources are README.md,
   docs/git-fanta.rst, and docs/git-fanta-dag.rst. The README identifies Git
   Fanta as a Git GUI, describes it as a fork of git-cola, and states that it
@@ -51,14 +54,20 @@ invented image or unsupported product claim.
   screenshots or marketing screenshots. Existing upstream git-cola imagery is
   not a current Git Fanta product asset and must not be presented as one.
 - The project owner has supplied media/screenshot.webp in the website
-  repository. It is a Phase 2 screenshot candidate, not an unknown stray
+  repository. It is a Phase 3 screenshot candidate, not an unknown stray
   artifact. Its product relevance, alternative text, intended destination, and
   publication permission must still be recorded before it is shipped.
-- The application repository has unrelated uncommitted user changes. Phase 2
+- The project owner has also supplied media/git-fanta-logo.png. It is a logo
+  candidate with no provenance or publication licence established by the file
+  alone. It must remain pending unless the project owner confirms permission
+  and the asset record documents its intended use, attribution, and any
+  transformation. It must not silently replace the source-backed application
+  SVG.
+- The application repository has unrelated uncommitted user changes. Phase 3
   operates only in the website repository and must not modify the application
   repository.
 - GitHub Release data, release asset classification, download metadata, and
-  API fetching are Phase 3 responsibilities. Phase 2 must not duplicate those
+  API fetching are Phase 4 responsibilities. Phase 3 must not duplicate those
   responsibilities in a local content file.
 
 ## Scope
@@ -95,6 +104,9 @@ The manifest must contain:
 - one screenshot record for the supplied media/screenshot.webp candidate. It
   remains pending with no destination file until its authenticity, alternative
   text, intended use, and publication permission are documented; and
+- one pending logo-candidate record for media/git-fanta-logo.png. It remains
+  outside public/brand until its provenance and publication permission are
+  confirmed; and
 - no release assets, download URLs, generated previews, or copied upstream
   screenshots.
 
@@ -140,10 +152,10 @@ the internal shape of an implementation merely because it exists.
 
 - Do not implement GitHub REST API calls, Zod schemas, release normalization,
   release asset classification, fixture mode, or download metadata. Those belong
-  to docs/implementation-plans/03-github-release-integration.md.
+  to docs/implementation-plans/04-github-release-integration.md.
 - Do not build the final homepage, download page, 404 page, SEO metadata,
   structured data, or the React download island. Those belong to
-  docs/implementation-plans/04-pages-and-interactivity.md.
+  docs/implementation-plans/05-pages-and-interactivity.md.
 - Do not create a screenshot, screenshot-like SVG, mockup, synthetic marketing
   image, or upstream git-cola image when an authentic Git Fanta screenshot is
   unavailable.
@@ -154,7 +166,7 @@ the internal shape of an implementation merely because it exists.
 - Do not add a CMS, backend, server-side rendering, database, authentication,
   cookies, analytics, remote font dependency, or asset CDN.
 - Do not add a release version, download URL, checksum, installer filename, or
-  operating-system recommendation to the Phase 2 content module.
+  operating-system recommendation to the Phase 3 content module.
 - Do not change the Git Fanta application repository, its working tree, or its
   release workflow.
 - Do not modify main or merge the feature branch as part of this plan.
@@ -169,8 +181,8 @@ the internal shape of an implementation merely because it exists.
   src/layouts/BaseLayout.astro, src/components/site/SiteHeader.astro, and
   the base-path-safe navigation contract.
 - Node.js 24 LTS, Corepack, and pnpm 11.4 are available.
-- The implementation branch is created from the current dev branch and its
-  pull request targets dev.
+- The implementation branch is based on the Phase 2 visual-experience branch
+  and its pull request targets dev.
 - A local checkout of hermes-agent-ak/git-fanta is available through the
   runtime-only GIT_FANTA_SOURCE_ROOT environment variable. Its value must not
   be written to a tracked file.
@@ -210,15 +222,15 @@ gate and update the content decision before proceeding.
   the screenshot evidence gate; otherwise keep the candidate pending.
 
 The following master-plan artifacts are referenced as future boundaries but are
-not created or modified by Phase 2:
+not created or modified by Phase 3:
 
-- docs/implementation-plans/03-github-release-integration.md
-- docs/implementation-plans/04-pages-and-interactivity.md
+- docs/implementation-plans/04-github-release-integration.md
+- docs/implementation-plans/05-pages-and-interactivity.md
 
 ## Files to modify
 
 - src/components/site/SiteHeader.astro — consume the approved product name
-  and selected logo through the Phase 2 content and asset modules. Modify only
+  and selected logo through the Phase 3 content and asset modules. Modify only
   after the Phase 1 component exists.
 - src/pages/index.astro — pass the approved product identity to the shell if
   the Phase 1 implementation currently contains bootstrap-only identity text.
@@ -226,12 +238,12 @@ not created or modified by Phase 2:
 - src/styles/global.css — modify only if the authentic logo needs a narrowly
   scoped size or alignment rule that cannot be expressed by the Phase 1 token
   contract.
-- docs/implementation-plans/02-content-and-product-assets.md — update the
+- docs/implementation-plans/03-content-and-product-assets.md — update the
   frontmatter and completion notes after implementation and verification.
 
 Do not modify package.json or add a validation dependency. The content and
 asset contracts are simple static data and pure TypeScript; adding a schema
-library here would duplicate the Phase 3 API boundary.
+library here would duplicate the Phase 4 API boundary.
 
 ## Data structures
 
@@ -268,8 +280,8 @@ Each record has:
 | ---------------- | -------------------------------------------------------------------------------- |
 | id               | Stable identifier such as brand-logo or product-screenshot                       |
 | kind             | logo or screenshot in this phase                                                 |
-| sourceRepository | Source repository; use hermes-agent-ak/git-fanta-site for the supplied candidate |
-| sourcePath       | media/screenshot.webp for the supplied candidate, or null if absent              |
+| sourceRepository | Source repository; use hermes-agent-ak/git-fanta-site for supplied candidates |
+| sourcePath       | media/screenshot.webp or media/git-fanta-logo.png for supplied candidates, or null if absent |
 | targetPath       | Static output path, or null while pending                                        |
 | status           | ready or pending                                                                 |
 | altText          | Explicit text or an explicit decorative-image decision                           |
@@ -282,7 +294,8 @@ source path. It must require a logo destination under public/brand and a ready
 screenshot destination under public/product. It must reject a pending screenshot
 that has a destination file. A pending screenshot record may reference the
 supplied candidate, but it is metadata and not a published image until the
-evidence gate passes.
+evidence gate passes. The supplied PNG logo candidate follows the same rule and
+must not replace the selected source-backed SVG without a documented decision.
 
 ### Accessibility contract for the logo
 
@@ -405,9 +418,8 @@ runtime configuration and must never be committed.
 ### Branch and dependency preflight
 
     set -eo pipefail
-    git switch dev
-    git pull --ff-only origin dev
-    git switch -c feature/phase-2-content-and-product-assets
+    git fetch origin feature/phase-2-visual-experience-and-motion
+    git switch -c feature/phase-3-content-and-product-assets origin/feature/phase-2-visual-experience-and-motion
     corepack enable
     pnpm install --frozen-lockfile
     test -n "$GIT_FANTA_SOURCE_ROOT"
@@ -469,8 +481,8 @@ inspection is required.
 - Reject ready logo destinations outside public/brand, reject ready screenshot
   destinations outside public/product, and reject pending screenshots with a
   destination file.
-- Verify that no release metadata or download contract is required by the Phase 2
-  modules; those concerns remain absent until Phase 3.
+- Verify that no release metadata or download contract is required by the Phase 3
+  modules; those concerns remain absent until Phase 4.
 
 ### Integration level
 
@@ -516,9 +528,10 @@ inspection is required.
 - src/content/product.ts contains only source-backed, reviewable product copy.
 - Every approved claim identifies hermes-agent-ak/git-fanta, a repository-relative
   source path, and a source section.
-- src/content/assets.ts contains exactly one ready logo record and one screenshot
-  record for media/screenshot.webp. The screenshot record is pending unless the
-  supplied candidate passes the evidence gate and is documented as ready.
+- src/content/assets.ts contains exactly one ready source-backed logo record,
+  one screenshot record for media/screenshot.webp, and one pending logo-candidate
+  record for media/git-fanta-logo.png. Candidate records are pending unless
+  their evidence gates pass and the decision is documented.
 - public/brand/git-fanta.svg is the selected authentic logo and is byte-identical
   to its documented application source.
 - No screenshot, mockup, upstream image, release data, or download metadata was
@@ -579,7 +592,7 @@ inspection is required.
 
 ## Rollback strategy
 
-- Keep all Phase 2 work on feature/phase-2-content-and-product-assets until
+- Keep all Phase 3 work on feature/phase-3-content-and-product-assets until
   review is complete.
 - If the logo's provenance is rejected, remove only the exact
   public/brand/git-fanta.svg file in a follow-up commit and keep the manifest
@@ -597,8 +610,8 @@ inspection is required.
 
 ## Definition of done
 
-- The implementation branch is based on dev and has a reviewable pull request
-  containing only Phase 2 changes.
+- The implementation branch is based on the Phase 2 visual-experience branch
+  and has a reviewable pull request containing only Phase 3 changes.
 - Product copy is source-backed, typed, validated, and free of unsupported
   claims.
 - The authentic logo is copied once, loads through the GitHub Pages base path,

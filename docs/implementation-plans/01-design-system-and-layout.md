@@ -42,6 +42,10 @@ later implementation phases.
 - src/lib/site-url.ts already provides siteHref for joining internal paths to the
   configured project base. Existing callers and tests must continue to use this
   helper.
+- The follow-up visual experience is intentionally planned as
+  docs/implementation-plans/02-visual-experience-and-motion.md. Phase 1 must
+  provide stable semantic surfaces for that phase without hard-coding a generic
+  marketing layout that would need to be replaced.
 - tests/unit/site-url.test.ts is the existing unit suite. tests/e2e/bootstrap.spec.ts
   is the existing Chromium/Axe smoke test and is the starting point for the
   design-foundation browser coverage.
@@ -133,7 +137,7 @@ Create:
 - SiteFooter.astro with repository, releases, issues, and licence links.
 
 Do not add a Download link until the download route exists in a later phase.
-Do not add a fabricated logo asset; the authentic logo belongs to Phase 2.
+Do not add a fabricated logo asset; the authentic logo belongs to Phase 3.
 
 ### 6. Apply the foundation to the bootstrap page
 
@@ -168,8 +172,12 @@ Do not add snapshot tests or pixel-perfect assertions for static styling.
   screenshot attribution, release data, release asset classification, download
   metadata, a download page, a 404 page, SEO metadata, structured data, or the
   React download island.
+- Do not implement the signature Branchline Navigation, Git Tree Reveal,
+  conceptual branch refs, commit-marker motion, or the visual showroom layer;
+  those belong to Phase 2 and must extend this foundation rather than replace
+  it.
 - Do not add the Git Fanta logo or other product assets. Those belong to
-  docs/implementation-plans/02-content-and-product-assets.md.
+  docs/implementation-plans/03-content-and-product-assets.md.
 - Do not add GitHub REST API calls, Zod schemas, fixture release data, or runtime
   network requests.
 - Do not add a CMS, backend, server-side rendering, database, authentication,
@@ -417,7 +425,8 @@ but must not introduce state or a second styling contract.
    SonarQube files.
 2. Compare every rendered sentence to the bootstrap-approved placeholder contract.
 3. Confirm that Phase 2 can consume the layout without replacing or bypassing the
-   components.
+   components. Phase 2 must preserve normal anchors, semantic landmarks, and the
+   static fallback path.
 4. Update this plan's status only after all checks and manual review gates pass.
 
 ## Commands
@@ -463,7 +472,7 @@ a global browser, scanner, or formatter dependency.
 ### Unit tests
 
 - navigation.test.ts verifies the shared item model, external-link markers, and
-  the absence of a download route before Phase 4.
+  the absence of a download route before Phase 5.
 - site-url.test.ts remains green and continues to cover home, route, and hash
   joining under the project base.
 - No unit test should merely assert that an exported constant equals itself or
