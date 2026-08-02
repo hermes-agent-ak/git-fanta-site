@@ -251,8 +251,9 @@ logo, release data, or unsupported product claim.
 - `src/components/visual/GitTreeReveal.astro` — decorative branch/tree layer.
 - `src/components/visual/CommitMarker.astro` — semantic-looking visual marker
   with an explicit decorative/accessibility contract.
-- `src/components/visual/branchline-enhancement.ts` — optional active-section
-  observer enhancement; omit this file when CSS and native anchors are enough.
+- `src/components/visual/branchline-enhancement.ts` — bounded active-section
+  observer enhancement that keeps the visual marker synchronized after clicks
+  and during normal scrolling.
 - `tests/unit/experience-sections.test.ts` — section model and ref policy tests.
 - `tests/e2e/visual-experience.spec.ts` — browser, keyboard, responsive, motion,
   fallback, and accessibility coverage.
@@ -352,8 +353,9 @@ automated reduced-motion assertion.
    and keyboard order. Before `BranchlineNav.astro` exists, the exact
    `getByRole("navigation", { name: "Branchline" })` assertion must fail with
    `Expected: 1` and `Received: 0`.
-2. GREEN: implement `BranchlineNav.astro` with ordinary anchors and an optional
-   small IntersectionObserver progressive enhancement.
+2. GREEN: implement `BranchlineNav.astro` with ordinary anchors and the small
+   IntersectionObserver progressive enhancement. Keep the anchors as the source
+   of truth when the script is unavailable.
 3. Verify keyboard navigation without JavaScript and verify that focus rings do
    not clip against the branch rail.
 
