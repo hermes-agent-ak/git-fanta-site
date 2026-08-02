@@ -32,12 +32,15 @@ pretend to be live repository data or replace ordinary content navigation.
 - Phase 1 provides semantic tokens, global accessibility defaults, BaseLayout,
   SkipLink, Container, Button, Card, SiteHeader, SiteFooter, and the shared
   navigation contract.
-- The bootstrap page currently contains a clearly labelled temporary foundation
-  preview and has no final product content or authentic product assets.
+- At Phase 2 start, the bootstrap page contained a clearly labelled temporary
+  foundation preview and no final product content or authentic product assets.
+  The implementation retains that boundary while composing the visual
+  showroom around it.
 - `src/styles/global.css` is the existing design-token and reduced-motion seam;
   Phase 2 should extend it rather than introduce a competing styling contract.
-- There is no visual graph component, section model, branchline navigation,
-  commit marker, scroll-driven motion, or design decision log yet.
+- At Phase 2 start, there was no visual graph component, section model,
+  Branchline Navigation, commit marker, scroll-driven motion, or design
+  decision log. The implementation now provides each of these artifacts.
 - The website is static Astro output. React remains reserved for a later useful
   download island and must not be introduced for decorative motion.
 - Phase 1 already proves the project-base URL contract, keyboard order, Axe
@@ -58,6 +61,23 @@ pretend to be live repository data or replace ordinary content navigation.
   [MDN's reduced-motion guidance](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion),
   [MDN's `content-visibility` guidance](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/content-visibility),
   and [web.dev's animation-performance guidance](https://web.dev/articles/animations-and-performance).
+
+## Implemented result
+
+- `experienceSections` is the single readonly source for five conceptual
+  anchors, refs, node kinds, tones, and accessible labels.
+- `BranchlineNav.astro` renders ordinary anchors with a validated server-side
+  fallback. The active state is owned by `data-active`; `aria-current` mirrors
+  it, and CSS consumes the same attribute.
+- `branchline-enhancement.ts` adds click synchronization and one bounded
+  `IntersectionObserver` for normal scrolling. It is 1,398 source bytes and
+  never replaces native navigation.
+- `GitTreeReveal.astro` and `CommitMarker.astro` remain decorative and have no
+  independent navigation-active state.
+- The decision log documents state ownership, rejected alternatives, and the
+  performance/accessibility translation of the focused reference research.
+- The implementation passes 11 unit tests, 13 browser tests, 3 Axe-tagged
+  tests, formatting, lint, type-check, build, and diff validation.
 
 ## Scope
 
@@ -430,7 +450,7 @@ Run commands from the repository root on the Phase 2 branch.
     pnpm build
     git diff --check
 
-If the optional active-section module exists, also run:
+The implemented active-section module must remain within its source budget:
 
     test "$(wc -c < src/components/visual/branchline-enhancement.ts)" -le 3072
 
@@ -476,9 +496,8 @@ dependency for this phase.
   request is introduced by the visual phase.
 - Assert the visual layer has no client directive and no continuous scroll loop.
 - Inspect animation declarations and allow only the documented motion properties.
-- Verify the optional active-section module stays below 3072 source bytes if it
-  is implemented; remove it if static CSS/anchor behavior is sufficient. The
-  bounded `wc -c` command above is the required check.
+- Verify the active-section module stays below 3072 source bytes. Native CSS
+  anchors remain the fallback if the module is unavailable.
 - Verify the production output remains static and base-path-safe.
 - Defer the full Lighthouse >=95 gate to Phase 6 while preserving the
   architecture needed to meet it.
@@ -512,9 +531,9 @@ dependency for this phase.
   content, navigation, focus, and state information.
 - No scroll hijacking, canvas/WebGL, autoplay video, full animation library,
   remote font, or large visual dependency is introduced.
-- Any active-section JavaScript is optional, uses a bounded observer rather than
-  a continuous scroll loop, and stays below the documented 3072-byte source
-  budget.
+- The active-section JavaScript uses one bounded observer rather than a
+  continuous scroll loop, stays below the documented 3072-byte source budget,
+  and cannot create a second visual active-state contract.
 - The visual layer passes unit, browser, keyboard, Axe, reduced-motion, narrow
   viewport, static-output, and diff checks.
 - Phase 3 can add authentic product content and screenshots without replacing
