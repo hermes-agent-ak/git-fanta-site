@@ -89,7 +89,6 @@ const experienceCopy = {
                 data-experience-section
                 data-node={section.node}
                 data-tone={section.tone}
-                data-motion="commit-resolve"
                 style={`--section-index: ${index}`}
               >
                 <div class="experience-section__meta">
@@ -103,8 +102,10 @@ const experienceCopy = {
                   <h2 id={`${section.id}-heading`}>{copy.title}</h2>
                 </div>
                 <p>{copy.description}</p>
-                <p class="experience-section__diff" data-motion="diff-reveal">
-                  <strong>+</strong>
+                <p class="experience-section__diff">
+                  <strong aria-hidden="true" data-motion="diff-reveal">
+                    +
+                  </strong>
                   <span>{copy.detail}</span>
                 </p>
 

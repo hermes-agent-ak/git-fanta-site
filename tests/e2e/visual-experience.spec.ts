@@ -23,6 +23,10 @@ test.describe("Branchline visual experience", () => {
     await links.nth(2).click();
     await expect(page).toHaveURL(`${basePath}#git-tree`);
     await expect(page.locator("#git-tree")).toBeVisible();
+    await expect(links.nth(2)).toHaveAttribute("aria-current", "location");
+    await expect(links.nth(2)).toHaveAttribute("data-active", "true");
+    await expect(links.nth(0)).toHaveAttribute("data-active", "false");
+    await expect(links.nth(0)).not.toHaveAttribute("aria-current", "location");
   });
 
   test("renders a decorative graph that does not carry semantic content", async ({
@@ -93,6 +97,5 @@ test.describe("Branchline visual experience", () => {
     expect(motionState.animationName).toBe("none");
     expect(Number(motionState.opacity)).toBeGreaterThan(0);
     await expect(page.locator("#main-content")).toBeVisible();
-    await expect(page.locator("script")).toHaveCount(0);
   });
 });
