@@ -1,10 +1,10 @@
 ---
-status: planned
+status: complete
 phase: 2
 depends_on:
   - docs/implementation-plans/01-design-system-and-layout.md
 implementation_branch: feature/phase-2-visual-experience-and-motion
-base_branch: feature/phase-1-design-system-and-layout
+base_branch: dev
 target_branch: dev
 ---
 
@@ -314,8 +314,9 @@ automated reduced-motion assertion.
 
 ### Step 0 — Verify the phase boundary and reference audit
 
-1. Confirm the branch is based on the pushed Phase 1 commit and the working tree
-   contains no unrelated changes.
+1. Confirm the branch is based on the current dev branch, which contains the
+   merged Phase 1 foundation, and the working tree contains no unrelated
+   changes.
 2. Re-read the Phase 1 component and URL contracts before editing.
 3. Record only the interaction lessons from the award references in the design
    decision log: menu choreography, section navigation, dynamic spatial layout,

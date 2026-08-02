@@ -5,9 +5,50 @@ import SiteHeader from "../components/site/SiteHeader.astro";
 import Button from "../components/ui/Button.astro";
 import Card from "../components/ui/Card.astro";
 import Container from "../components/ui/Container.astro";
+import BranchlineNav from "../components/visual/BranchlineNav.astro";
+import GitTreeReveal from "../components/visual/GitTreeReveal.astro";
+import { experienceSections } from "../lib/experience-sections";
 import { siteHref } from "../lib/site-url";
 
 const baseUrl = import.meta.env.BASE_URL;
+
+const experienceCopy = {
+  foundation: {
+    title: "A foundation you can branch from",
+    description:
+      "The first visual node keeps the accessible static shell visible while the future product story takes shape.",
+    detail:
+      "Semantic structure is the root commit: every later visual layer must remain usable without it.",
+  },
+  branchline: {
+    title: "Navigation with a clear route",
+    description:
+      "Branchline turns the page sequence into ordinary anchors with a visual route that stays legible at every viewport.",
+    detail:
+      "The refs are authored design metadata. They make the system feel like Git without pretending to report live repository state.",
+  },
+  "git-tree": {
+    title: "A tree that supports the content",
+    description:
+      "Connectors and commit markers provide continuity beside the content, then disappear semantically when the layer is decorative.",
+    detail:
+      "The graph is CSS-owned and layout-safe: removing it never removes information or changes the reading order.",
+  },
+  motion: {
+    title: "Motion with a reason to exist",
+    description:
+      "Progressive reveals clarify where the reader is and what changed without hijacking scroll or hiding the next step.",
+    detail:
+      "Every motion intent has a bounded duration, a compositor-friendly property, and a static fallback.",
+  },
+  handoff: {
+    title: "Ready for the next phase",
+    description:
+      "The visual contract leaves room for verified product content and release data without requiring a layout rewrite.",
+    detail:
+      "This merge point is a promise about architecture, not a claim about the application or its release state.",
+  },
+} as const;
 ---
 
 <BaseLayout
@@ -18,62 +59,115 @@ const baseUrl = import.meta.env.BASE_URL;
   <SiteHeader slot="header" baseUrl={baseUrl} />
 
   <Container as="section" size="xl">
-    <div class="max-w-3xl py-16 sm:py-24 lg:py-32">
-      <p class="eyebrow">Temporary foundation placeholder</p>
-      <h1
-        class="max-w-3xl text-display font-extrabold leading-none tracking-tight text-fg-primary"
-      >
-        Git Fanta
-      </h1>
-      <p class="mt-6 max-w-2xl text-lg leading-8 text-fg-muted sm:text-xl">
-        The accessible static site foundation is ready for the later content
-        phases.
-      </p>
+    <div class="branchline-stage">
+      <div class="max-w-4xl pb-10 pt-12 sm:pb-14 sm:pt-20">
+        <p class="eyebrow">Temporary visual foundation</p>
+        <h1
+          class="max-w-4xl text-display font-extrabold leading-none tracking-tight text-fg-primary"
+        >
+          Git Fanta
+        </h1>
+        <p class="mt-6 max-w-2xl text-lg leading-8 text-fg-muted sm:text-xl">
+          A branchable interface foundation: semantic HTML first, with a
+          lightweight visual route for the work ahead.
+        </p>
+      </div>
 
-      <section class="mt-14" aria-labelledby="foundation-preview-heading">
-        <div class="mb-6">
-          <p class="eyebrow">Replaceable component preview</p>
-          <h2
-            id="foundation-preview-heading"
-            class="text-title font-bold text-fg-primary"
-          >
-            Semantic interface building blocks
-          </h2>
-        </div>
+      <BranchlineNav sections={experienceSections} />
 
-        <div class="grid gap-5 md:grid-cols-2">
-          <Card tone="accent" interactive>
-            <h3 class="text-lg font-bold text-fg-primary">Link mode</h3>
-            <p class="mt-3 text-fg-muted">
-              This temporary preview exercises a keyboard-reachable link.
-            </p>
-            <div class="mt-5">
-              <Button
-                href={siteHref("/#main-content", baseUrl)}
-                variant="secondary"
+      <div class="branchline-content">
+        <GitTreeReveal sections={experienceSections} />
+        {
+          experienceSections.map((section, index) => {
+            const copy = experienceCopy[section.id];
+
+            return (
+              <section
+                id={section.id}
+                class="experience-section"
+                aria-labelledby={`${section.id}-heading`}
+                data-experience-section
+                data-node={section.node}
+                data-tone={section.tone}
+                data-motion="commit-resolve"
+                style={`--section-index: ${index}`}
               >
-                Return to content
-              </Button>
-            </div>
-          </Card>
+                <div class="experience-section__meta">
+                  <span class="experience-section__ref">{section.ref}</span>
+                  <span class="experience-section__number">
+                    node {String(index + 1).padStart(2, "0")}
+                  </span>
+                </div>
+                <div>
+                  <p class="eyebrow">{section.label} / visual contract</p>
+                  <h2 id={`${section.id}-heading`}>{copy.title}</h2>
+                </div>
+                <p>{copy.description}</p>
+                <p class="experience-section__diff" data-motion="diff-reveal">
+                  <strong>+</strong>
+                  <span>{copy.detail}</span>
+                </p>
 
-          <Card tone="success">
-            <h3 class="text-lg font-bold text-fg-primary">Native mode</h3>
-            <p class="mt-3 text-fg-muted">
-              This temporary preview keeps native button semantics intact.
-            </p>
-            <div class="mt-5">
-              <Button
-                variant="ghost"
-                disabled
-                ariaLabel="Preview action unavailable"
-              >
-                Preview action
-              </Button>
-            </div>
-          </Card>
-        </div>
-      </section>
+                {section.id === "foundation" && (
+                  <div
+                    class="mt-4"
+                    aria-labelledby="foundation-preview-heading"
+                  >
+                    <div class="mb-6">
+                      <p class="eyebrow">Replaceable component preview</p>
+                      <h3
+                        id="foundation-preview-heading"
+                        class="text-title font-bold text-fg-primary"
+                      >
+                        Semantic interface building blocks
+                      </h3>
+                    </div>
+
+                    <div class="grid gap-5 md:grid-cols-2">
+                      <Card tone="accent" interactive>
+                        <h4 class="text-lg font-bold text-fg-primary">
+                          Link mode
+                        </h4>
+                        <p class="mt-3 text-fg-muted">
+                          This temporary preview exercises a keyboard-reachable
+                          link.
+                        </p>
+                        <div class="mt-5">
+                          <Button
+                            href={siteHref("/#main-content", baseUrl)}
+                            variant="secondary"
+                          >
+                            Return to content
+                          </Button>
+                        </div>
+                      </Card>
+
+                      <Card tone="success">
+                        <h4 class="text-lg font-bold text-fg-primary">
+                          Native mode
+                        </h4>
+                        <p class="mt-3 text-fg-muted">
+                          This temporary preview keeps native button semantics
+                          intact.
+                        </p>
+                        <div class="mt-5">
+                          <Button
+                            variant="ghost"
+                            disabled
+                            ariaLabel="Preview action unavailable"
+                          >
+                            Preview action
+                          </Button>
+                        </div>
+                      </Card>
+                    </div>
+                  </div>
+                )}
+              </section>
+            );
+          })
+        }
+      </div>
     </div>
   </Container>
 
