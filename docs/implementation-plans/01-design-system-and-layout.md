@@ -13,7 +13,10 @@ This plan also defines an optional SonarQube quality lane from the beginning of 
 - The repository currently contains the initial documentation commit 64fa865 on main.
 - dev has been created from main and pushed as the shared integration branch.
 - feature/phase-1-design-system-and-layout has been created from dev for this plan.
-- The repository currently contains README.md and docs/master-planning-and-implementation-brief.md only. No package.json, Astro source tree, stylesheet, component library, test suite, or workflow exists yet.
+- Before the current onboarding step, the repository contained README.md and docs/master-planning-and-implementation-brief.md only. No package.json, Astro source tree, stylesheet, component library, or test suite exists yet; the two SonarQube onboarding files are now the only CI-related additions.
+- SonarQube Community Build has now been configured manually for the website project. The project was imported through the GitHub integration, and the onboarding generated `.github/workflows/build.yml` plus `sonar-project.properties`.
+- The generated SonarQube workflow is a bootstrap artifact, not yet the final CI design: it currently targets a GitHub-hosted runner and therefore cannot reach the owner's local `http://localhost:9000` instance. The final local setup requires an explicitly trusted self-hosted runner or a different reachable server mode.
+- The SonarQube project key in `sonar-project.properties` is a public project identifier, not a credential. A different SonarQube instance may use a different project key; the plan must never assume that an instance-specific key is portable across servers.
 - The Phase 0 bootstrap plan is a prerequisite. It is expected to create the Astro project, strict TypeScript configuration, Tailwind CSS 4 Vite integration, React integration, package scripts, and the initial source/test directories.
 - The approved architecture is static Astro output. Static sections must remain Astro components; React may be used only for a genuinely interactive island in a later phase.
 - The user has a local SonarQube instance at http://localhost:9000. This is a local development capability, not a credential or a CI endpoint. A GitHub-hosted runner cannot reach a developer's localhost.
@@ -46,6 +49,23 @@ The SonarQube lane is part of the plan but is opt-in. It should be implemented w
 | Not configured | No SonarQube variables or secrets | The optional job is skipped or excluded from baseline CI; formatting, linting, type checking, tests, build, and accessibility checks remain authoritative. |
 
 The plan must not require exposing the local SonarQube port to the public internet. If the owner wants GitHub-hosted CI analysis, a separate manual setup decision is required: provide a secured reachable SonarQube endpoint, or use a properly isolated self-hosted runner. A raw port-forward of the local instance is not an acceptable default.
+
+### Configured free localhost setup
+
+The current optional path uses SonarQube Community Build on the developer-controlled machine. It is intentionally free of SonarQube Cloud or paid multi-branch features and is suitable for trusted branch analysis. The following requirements are part of this path:
+
+| Requirement | Configuration | Why it is required |
+| --- | --- | --- |
+| SonarQube server | A running Community Build instance reachable as `http://localhost:9000` from the analysis runner | The scanner needs a server endpoint, while keeping the instance private avoids exposing a development service to the internet. |
+| GitHub integration | A GitHub App configured in SonarQube with the required API URL, App ID, Client ID, Client Secret, and private key | Repository import and GitHub project binding are handled by the SonarQube GitHub integration rather than by a runtime application server. These values remain in SonarQube's protected configuration and never enter the repository. |
+| Imported project | The `hermes-agent-ak/git-fanta-site` repository is imported and bound to a SonarQube project | Binding gives the scanner a stable project identity and allows the GitHub Actions analysis to report to the intended project. |
+| Repository secret | `SONAR_TOKEN` contains a project or analysis token created in SonarQube | The scanner must authenticate without placing a credential in YAML, source code, plans, or logs. |
+| Runtime server URL | `SONAR_HOST_URL` is injected at runtime; `http://localhost:9000` is the local default | The URL is configuration rather than a secret, but runtime injection keeps the repository portable. `localhost` always means the machine running the job, not automatically the developer's workstation. |
+| Runner placement | A trusted Linux x86_64 self-hosted runner runs on the same machine as SonarQube, or can otherwise resolve the local endpoint | GitHub-hosted runners are separate ephemeral machines and cannot access a private developer localhost. A self-hosted runner is the smallest free solution that preserves a private local service. |
+| Workflow trust boundary | SonarQube analysis runs only on trusted pushes to protected branches and/or explicit manual dispatch; it is not run on arbitrary fork pull requests | A public repository must not allow untrusted pull-request code to execute on a runner that can access a local network service or long-lived credentials. |
+| Repository files | `.github/workflows/build.yml` and `sonar-project.properties` are tracked; neither contains a token or private key | The workflow and scanner project identity are reproducible configuration. Secrets belong in GitHub/SonarQube credential stores, not in Git history. |
+
+The generated onboarding workflow is retained as the initial configuration record. Before it is treated as an operational CI lane, Phase 5 must replace `ubuntu-latest` with an explicitly approved runner label for the local mode, restrict its triggers to the documented trust boundary, and make the quality-gate behavior explicit. The baseline PR checks remain independent of SonarQube so contributors can work without access to the local server.
 
 ## Explicit non-scope
 
@@ -96,7 +116,8 @@ The following paths are repository-relative and must be created during Phase 1:
 - src/components/ui/Button.astro
 - src/components/ui/Card.astro
 - tests/e2e/design-foundation.spec.ts
-- sonar-project.properties only when the optional SonarQube lane is enabled by the repository owner; it must remain valid without containing credentials.
+- .github/workflows/build.yml only when the optional SonarQube lane is enabled by the repository owner; the generated onboarding file is tracked as configuration but is not considered production-ready for localhost until the runner and trigger restrictions are implemented.
+- sonar-project.properties only when the optional SonarQube lane is enabled by the repository owner; it must contain only the instance's public project identifier and repository-relative analysis settings, never credentials.
 
 ## Files to modify
 
@@ -186,16 +207,16 @@ The implementation may use Astro's generated prop types or a shared TypeScript t
 If enabled, sonar-project.properties must use repository-relative paths and must not contain a host-specific absolute path or token:
 
 ~~~properties
-sonar.projectKey=git-fanta-site
+sonar.projectKey=<project-key-created-in-sonarqube>
 sonar.projectName=git-fanta-site
 sonar.sources=src
-sonar.tests=src,tests
-sonar.exclusions=dist/**,node_modules/**,public/**
+sonar.tests=tests
+sonar.exclusions=dist/**,node_modules/**,public/**,coverage/**
 sonar.javascript.lcov.reportPaths=coverage/lcov.info
 sonar.typescript.tsconfigPaths=tsconfig.json
 ~~~
 
-At implementation time, verify the selected scanner's support for .astro files and adjust only the source/test inclusion rules that the scanner documents. Do not force unsupported files through the TypeScript analyzer. SONAR_HOST_URL and SONAR_TOKEN must be injected at runtime; neither belongs in this file.
+The project-key line is a portable placeholder for the plan, not a value to copy literally. The committed file must contain the key of the imported SonarQube project; another instance may use another non-secret key. At implementation time, verify the selected scanner's support for .astro files and adjust only the source/test inclusion rules that the scanner documents. Do not force unsupported files through the TypeScript analyzer. `SONAR_HOST_URL` and `SONAR_TOKEN` must be injected at runtime; neither belongs in this file.
 
 ## Implementation steps
 
@@ -262,23 +283,22 @@ If any prerequisite is missing, stop Phase 1 and report the exact missing path o
 
 This work can proceed in parallel with Steps 2–6 after the Phase 0 CI workflow and TypeScript configuration exist.
 
-1. Ask the repository owner to choose one of the three SonarQube modes in the dependency table.
-2. If local-only analysis is selected, configure SONAR_HOST_URL as a local environment variable with the value http://localhost:9000 and provide SONAR_TOKEN through a local credential mechanism. Do not write either value into a committed file, shell history, plan, or log.
-3. If GitHub-hosted CI analysis is selected, the owner must manually create/configure the SonarQube project, make the server reachable over secured HTTPS, and add:
-   - repository variable SONAR_HOST_URL;
-   - repository or environment secret SONAR_TOKEN;
-   - the SonarQube project key and any quality-gate policy agreed by the owner.
-4. If a self-hosted runner is selected, the owner must manually register and secure the runner, document its network boundary, restrict repository access, and verify that the runner can reach the SonarQube service without exposing it publicly.
-5. Add optional scanner configuration using only repository-relative paths. Pin the scanner action or package version and record the exact immutable reference.
-6. Add an optional sonarqube CI job to .github/workflows/ci.yml only when the Phase 0 workflow exists. The job must:
-   - run after source checkout and dependency installation;
-   - use configured SONAR_HOST_URL and masked SONAR_TOKEN inputs;
-   - fail clearly if the opt-in flag is enabled but required configuration is absent;
-   - be skipped when the opt-in flag is disabled or no SonarQube mode is configured;
+1. Record the manual setup checkpoint: the GitHub App is configured in SonarQube, `hermes-agent-ak/git-fanta-site` is imported and bound, and the project key is present in `sonar-project.properties`. App credentials are entered only in SonarQube's protected settings.
+2. Commit `.github/workflows/build.yml` and `sonar-project.properties` as tracked configuration. Review the diff and repository search results to confirm that only the public project identifier and secret names are present.
+3. Create a SonarQube project or analysis token and store it in the website repository's GitHub Actions secrets as `SONAR_TOKEN`. Never put the token in a workflow, properties file, shell command, plan, issue, or log.
+4. Configure `SONAR_HOST_URL` as runtime configuration. A repository variable is preferred because the URL is not a credential; the generated onboarding workflow may use a secret reference, which is acceptable if the owner has already configured it there. In local mode the value is `http://localhost:9000`, but it must resolve from the runner rather than from the developer's browser.
+5. For the free localhost mode, manually register a repository-level Linux x86_64 self-hosted runner on the trusted machine. Verify that it can make outbound HTTPS connections to GitHub and reach the local SonarQube service. Do not expose port 9000 through an unauthenticated tunnel.
+6. Restrict the local SonarQube workflow to trusted pushes to protected `dev`/`main` branches and explicit `workflow_dispatch`. Do not run this self-hosted job for arbitrary fork pull requests. Keep normal pull-request checks on GitHub-hosted runners independent from the local SonarQube service.
+7. Replace the generated `ubuntu-latest` runner with the approved self-hosted label only when the runner is registered and the trust boundary is documented. Keep the scanner action pinned to a stable immutable reference and retain `fetch-depth: 0` for analysis history.
+8. Add the final SonarQube job only after the Phase 0 workflow exists. The job must:
+   - run after checkout, Node 24 setup, pnpm installation, dependency installation, and the relevant project checks;
+   - use configured `SONAR_HOST_URL` and masked `SONAR_TOKEN` inputs;
+   - fail clearly if required configuration is absent when the trusted-branch job is enabled;
    - use least-privilege GitHub token permissions;
-   - never print the token or include it in command arguments or generated output.
-7. Add a post-scan check for generated HTML, JavaScript, source maps, logs, and reports to ensure that secret values cannot reach artifacts. The check must never print the value it searches for.
-8. Document manual GitHub/SonarQube setup in README.md or CONTRIBUTING.md only as a later quality/development instruction; keep this implementation plan free of credential values.
+   - never print the token or include it in command arguments or generated output;
+   - make quality-gate enforcement explicit through the supported scanner/action mechanism rather than leaving a commented example as the final policy.
+9. Add a post-scan check for generated HTML, JavaScript, source maps, logs, and reports to ensure that secret values cannot reach artifacts. The check must never print the value it searches for.
+10. Document the manual GitHub/SonarQube setup, runner trust boundary, and local-versus-GitHub-hosted limitation in README.md or CONTRIBUTING.md during the quality/development plan. Keep this implementation plan free of credential values and personal machine paths.
 
 The SonarQube job must not block the first design-system pull request merely because the owner has not completed the optional server configuration. Once the owner enables the job, a failed quality gate is a real CI failure and must not be hidden.
 
@@ -355,9 +375,11 @@ At viewport widths of approximately 320, 768, and 1440 CSS pixels:
 
 Before enabling the CI job, the repository owner must verify from the SonarQube UI that:
 
+- the GitHub App configuration is saved and the repository import is bound to the intended project;
 - the project key is correct;
 - the token was created without placing its value in any repository file;
-- the configured server is reachable from the selected CI runner;
+- `SONAR_HOST_URL` is configured as runtime data and is reachable from the selected CI runner; for localhost mode, the check must be performed on the self-hosted runner machine itself;
+- the self-hosted runner is repository-scoped, online, patched, and not available to untrusted fork pull requests;
 - the quality gate reflects the website's actual baseline and does not require unsupported coverage before tests exist;
 - the scanner reports source/test paths relative to the checkout.
 
@@ -375,7 +397,10 @@ The owner should be notified at this checkpoint because it requires external Git
 - Static layout sections contain no React hydration directive.
 - Chromium smoke and Axe accessibility checks pass at desktop and narrow mobile viewports.
 - The design foundation uses no remote fonts, analytics, cookies, UI framework, or animation library.
-- Optional SonarQube configuration, if enabled, uses repository-relative paths and runtime SONAR_HOST_URL/SONAR_TOKEN injection only.
+- `.github/workflows/build.yml` and `sonar-project.properties`, if enabled, contain only reproducible configuration and public project identifiers; no token, private key, or machine-specific absolute path is committed.
+- The optional free localhost SonarQube setup has a documented Community Build project, GitHub App binding, `SONAR_TOKEN` secret, runtime `SONAR_HOST_URL`, and a trusted self-hosted runner that can reach the local server.
+- The generated SonarQube workflow is not considered operational for localhost until its runner, trusted triggers, action pin, and quality-gate policy are explicitly finalized.
+- Optional SonarQube configuration, if enabled, uses repository-relative paths and runtime `SONAR_HOST_URL`/`SONAR_TOKEN` injection only.
 - No real secret, credential value, personal machine path, or unsafe unbounded command appears in this plan or any Phase 1 artifact.
 - The optional SonarQube job is skipped safely when not configured and becomes a visible CI failure after the owner explicitly enables it and its prerequisites are present.
 - The feature branch is reviewed through a pull request into dev; main is not modified by this phase.
@@ -389,6 +414,8 @@ The owner should be notified at this checkpoint because it requires external Git
 - A component requires client state: keep the primitive static and move actual interactive behavior to the later approved React island.
 - SonarQube is unreachable locally: report the endpoint failure without printing the token; do not expose the local server or make baseline CI depend on it.
 - GitHub-hosted CI cannot reach localhost:9000: keep the optional job disabled until the owner provides a secured reachable endpoint or an approved self-hosted runner.
+- `localhost` resolves on the wrong machine: run the scan on the SonarQube host or replace the endpoint with a secured, runner-reachable URL; do not guess an IP address or create an ad-hoc public tunnel.
+- A public fork pull request is routed to the local self-hosted runner: stop the workflow, remove the untrusted trigger, review runner access, and keep SonarQube analysis limited to trusted branch pushes.
 - SonarQube is enabled without a token or project: fail with a clear configuration message; never log or guess credentials.
 - SonarQube reports unsupported Astro files: adjust documented scanner inclusion rules and keep TypeScript analysis limited to supported inputs.
 - Generated output contains a secret or absolute path: stop the build, remove the source of the leak, rotate any real credential immediately if one was exposed, and rerun the output scan.
@@ -400,6 +427,8 @@ The owner should be notified at this checkpoint because it requires external Git
 - SONAR_HOST_URL is configuration, not a credential. SONAR_TOKEN must be supplied through a masked CI secret or a local credential mechanism and must never be defined as a PUBLIC_ value.
 - Do not place credentials in URLs, command arguments, shell history, screenshots, fixtures, source maps, browser bundles, workflow logs, or SonarQube reports.
 - GitHub-hosted runners must not be given access to the owner's local localhost:9000 through an ad-hoc public tunnel. Use a secured endpoint or an isolated self-hosted runner with documented trust boundaries.
+- A self-hosted runner for this public repository must not process arbitrary fork pull requests. Trusted-branch-only triggers are a security boundary, not merely a performance choice.
+- The SonarQube GitHub App's Client Secret and private key belong only in SonarQube's encrypted/protected configuration; they are distinct from the `SONAR_TOKEN` used by the scanner and must never be copied into GitHub Actions or repository files.
 - CI workflows must use least-privilege permissions and immutable action references.
 - All generated HTML and JavaScript must remain static and token-free.
 - Any accidental credential exposure requires immediate credential rotation and a repository/CI audit before the branch is merged.
@@ -410,6 +439,7 @@ The owner should be notified at this checkpoint because it requires external Git
 - If the design foundation is rejected, close the pull request and delete the feature branch after confirming no required work exists only there. Do not reset or rewrite dev or main.
 - If the feature has already merged to dev, use a normal git revert commit targeting the exact Phase 1 commit or merge commit; do not use a destructive history rewrite.
 - Disable the optional SonarQube lane by setting its opt-in repository variable to false or reverting its CI job. Do not delete the SonarQube project or rotate credentials as a substitute for disabling a job.
+- If the local runner is unavailable, disable only the SonarQube job or trusted trigger; baseline CI and deployment must remain independent. Do not replace the local endpoint with an unreviewed public tunnel.
 - If a secret was exposed, stop all promotion, rotate it in the credential provider, remove it from every artifact, and document the incident before continuing.
 
 ## Definition of done
@@ -418,6 +448,7 @@ The owner should be notified at this checkpoint because it requires external Git
 - The plan is independently reviewable and contains exact repository-relative paths, data structures, commands, tests, acceptance criteria, failure handling, security controls, and rollback instructions.
 - The Phase 1 branch strategy is explicit: main is deployable, dev is integration, and the feature branch targets dev through a pull request.
 - The design token contract, global styles, layout primitives, site chrome, and accessibility foundation are specified without inventing product content.
-- The optional SonarQube lane is specified for local, GitHub-hosted, self-hosted, and unconfigured modes, including the localhost:9000 limitation and manual setup checkpoint.
+- The optional SonarQube lane is specified for local, GitHub-hosted, self-hosted, and unconfigured modes, including the localhost:9000 limitation, manual GitHub App/project setup, secret handling, runner trust boundary, and quality-gate checkpoint.
+- The current SonarQube onboarding artifacts are identified as tracked bootstrap configuration, with the remaining runner and CI hardening work assigned to the quality plan.
 - No secret, personal absolute path, or unsafe command is present in this plan.
 - A reviewer can implement the phase from a clean checkout on another supported machine after the documented Phase 0 prerequisites are present.
