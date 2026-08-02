@@ -1,0 +1,30 @@
+---
+import "../styles/global.css";
+import SkipLink from "../components/ui/SkipLink.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  mainClass?: string;
+}
+
+const { title, description, mainClass } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <SkipLink />
+    <slot name="header" />
+    <main id="main-content" class={mainClass}>
+      <slot />
+    </main>
+    <slot name="footer" />
+  </body>
+</html>
