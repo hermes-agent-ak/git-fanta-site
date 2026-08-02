@@ -828,8 +828,11 @@ Update the Git Fanta release workflow to dispatch a website rebuild after a rele
   `feature/phase-2-visual-experience-and-motion`; its Branchline state contract,
   decorative graph boundary, and performance budget are documented in the Phase
   2 plan and decision log.
-- Phase 3 — content and product assets: planned next, with its branch based on
-  the completed Phase 2 branch.
+- Phase 3 — content and product assets: plan reviewed and marked
+  ready-for-implementation on
+  `feature/phase-3-content-and-product-assets`, based on the completed Phase 2
+  branch. Its source-backed logo, content provenance, and pending-media gates
+  remain the next implementation boundary.
 
 ## 20. Codex operating instructions
 

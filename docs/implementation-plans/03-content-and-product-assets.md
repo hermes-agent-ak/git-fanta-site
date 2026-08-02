@@ -1,6 +1,8 @@
 ---
 status: planned
 phase: 3
+plan_reviewed_at: 2026-08-03
+plan_review_status: ready-for-implementation
 depends_on:
   - docs/implementation-plans/01-design-system-and-layout.md
   - docs/implementation-plans/02-visual-experience-and-motion.md
@@ -27,9 +29,11 @@ invented image or unsupported product claim.
 
 ## Current-state findings
 
-- Phase 0 is implemented on the current website branch. The site currently has
-  src/pages/index.astro, src/styles/global.css, src/lib/site-url.ts, unit
-  tests, an E2E smoke test, and no src/content/ or public/ asset tree.
+- The Phase 2 visual experience is implemented on the predecessor branch and
+  this Phase 3 branch is based on that reviewed tip. The site currently has
+  src/pages/index.astro, src/styles/global.css, src/lib/site-url.ts, the
+  Branchline visual components, unit tests, E2E coverage, and no src/content/
+  or public/ asset tree.
 - Phase 1 is specified in
   docs/implementation-plans/01-design-system-and-layout.md. Its layout and
   site-header outputs are prerequisites for the small shell integration in this
@@ -72,6 +76,17 @@ invented image or unsupported product claim.
 - The application repository has unrelated uncommitted user changes. Phase 3
   operates only in the website repository and must not modify the application
   repository.
+- The pre-implementation source evidence gate was rechecked on 2026-08-03:
+  all seven required source paths exist, the two Git Fanta SVG variants have
+  the same SHA-256 checksum, and the bounded application asset inventory found
+  no raster screenshot to reuse. The source checkout path remains runtime-only
+  and is not recorded in this plan.
+- The supplied `media/git-fanta-logo.png` is present as a 1024×1024 candidate
+  and `media/screenshot.webp` is present as a screenshot candidate. Neither
+  file contains provenance or a licence record by itself. The source-backed
+  SVG is therefore the ready logo for the shell; the supplied PNG and
+  screenshot remain pending manifest records until their evidence decisions
+  are documented.
 - GitHub Release data, release asset classification, download metadata, and
   API fetching are Phase 4 responsibilities. Phase 3 must not duplicate those
   responsibilities in a local content file.
@@ -208,6 +223,15 @@ application checkout:
 
 If a source path, claim, or licence statement has changed, stop at the evidence
 gate and update the content decision before proceeding.
+
+### Review decision
+
+The plan is ready for implementation on
+`feature/phase-3-content-and-product-assets`. The review found no missing
+Phase 1/2 dependency or duplicate content/asset abstraction. The first
+implementation slice is consequently limited to the source-backed content
+contract, typed asset manifest, licence ledger, and SVG shell integration; the
+two supplied media candidates remain behind their explicit evidence gates.
 
 ## Files to create
 
