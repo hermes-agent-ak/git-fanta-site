@@ -1,5 +1,5 @@
 ---
-status: planned
+status: complete
 phase: 1
 depends_on:
   - docs/implementation-plans/00-project-bootstrap.md
@@ -613,3 +613,19 @@ a global browser, scanner, or formatter dependency.
   changes.
 - The plan is changed from planned to complete only after all acceptance criteria
   and review gates pass.
+
+## Completion notes
+
+- Implemented the semantic token layer, global accessibility defaults, static
+  layout, SkipLink, Container, Button, Card, shared navigation, site header, and
+  site footer.
+- Updated the bootstrap page with a clearly labelled, replaceable foundation
+  preview and no later-phase product, release, screenshot, or download content.
+- Added navigation unit coverage and design-foundation browser coverage for
+  landmarks, base-path-safe links, focus behavior, reduced motion, keyboard
+  order, native control semantics, responsive overflow, and Axe at desktop and
+  320px viewports.
+- Verified with `pnpm format:check`, `pnpm lint`, `pnpm check`, `pnpm test:unit`,
+  `pnpm build`, `pnpm test:e2e`, `pnpm test:a11y`, and `git diff --check`.
+- Confirmed `.github/workflows/build.yml` and `sonar-project.properties` remain
+  unchanged.

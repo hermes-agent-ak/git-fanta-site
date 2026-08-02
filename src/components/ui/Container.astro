@@ -1,0 +1,28 @@
+---
+type ContainerSize = "sm" | "md" | "lg" | "xl" | "full";
+type ContainerElement =
+  "article" | "div" | "footer" | "header" | "nav" | "section";
+
+interface Props {
+  size?: ContainerSize;
+  as?: ContainerElement;
+}
+
+const { size = "xl", as: element = "div" } = Astro.props as Props;
+
+const maxWidthClasses: Record<ContainerSize, string> = {
+  sm: "max-w-3xl",
+  md: "max-w-4xl",
+  lg: "max-w-6xl",
+  xl: "max-w-7xl",
+  full: "max-w-none",
+};
+
+const Element = element;
+---
+
+<Element
+  class:list={["mx-auto w-full px-4 sm:px-6 lg:px-8", maxWidthClasses[size]]}
+>
+  <slot />
+</Element>

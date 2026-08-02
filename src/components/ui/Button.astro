@@ -1,0 +1,67 @@
+---
+type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+type ButtonSize = "sm" | "md" | "lg";
+type NativeButtonType = "button" | "submit" | "reset";
+
+interface Props {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  href?: string;
+  type?: NativeButtonType;
+  disabled?: boolean;
+  ariaLabel?: string;
+}
+
+const {
+  variant = "primary",
+  size = "md",
+  href,
+  type: buttonType = "button",
+  disabled = false,
+  ariaLabel,
+} = Astro.props;
+
+const variantClasses: Record<ButtonVariant, string> = {
+  primary: "bg-accent-orange text-accent-contrast hover:bg-accent-orange-hover",
+  secondary:
+    "border border-border-strong bg-bg-surface text-fg-primary hover:border-accent-orange hover:text-accent-orange",
+  ghost: "text-fg-primary hover:bg-bg-elevated hover:text-accent-orange",
+  danger: "bg-status-danger text-bg-page hover:bg-accent-orange-hover",
+};
+
+const sizeClasses: Record<ButtonSize, string> = {
+  sm: "min-h-10 px-3 text-sm",
+  md: "min-h-11 px-4 text-sm",
+  lg: "min-h-12 px-6 text-base",
+};
+
+const classes = [
+  "inline-flex items-center justify-center gap-2 rounded-md font-semibold no-underline shadow-sm transition-colors duration-150",
+  "focus-visible:outline-3 focus-visible:outline-offset-2",
+  variantClasses[variant],
+  sizeClasses[size],
+];
+---
+
+{
+  href ? (
+    <a
+      class:list={classes}
+      href={href}
+      aria-label={ariaLabel}
+      aria-disabled={disabled ? "true" : undefined}
+      tabindex={disabled ? -1 : undefined}
+    >
+      <slot />
+    </a>
+  ) : (
+    <button
+      class:list={classes}
+      type={buttonType}
+      disabled={disabled}
+      aria-label={ariaLabel}
+    >
+      <slot />
+    </button>
+  )
+}
