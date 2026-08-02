@@ -1,0 +1,63 @@
+---
+import type { ExperienceSection } from "../../lib/experience-sections";
+
+interface Props {
+  sections: readonly ExperienceSection[];
+  currentId?: string;
+}
+
+const { sections, currentId = sections[0]?.id } = Astro.props;
+
+function shortRef(ref: string): string {
+  return ref.replace("refs/heads/", "");
+}
+---
+
+<nav class="branchline-nav" aria-label="Branchline" data-branchline-nav>
+  <details class="branchline-nav__disclosure" open>
+    <summary>Explore the branchline</summary>
+    <div class="branchline-nav__body">
+      <div class="branchline-nav__intro">
+        <p class="eyebrow">Conceptual navigation</p>
+        <p>
+          A visual route through the foundation. Refs are design metadata, not
+          live repository state.
+        </p>
+      </div>
+      <ol class="branchline-nav__list">
+        {
+          sections.map((section) => {
+            const isCurrent = section.id === currentId;
+
+            return (
+              <li class="branchline-nav__item">
+                <a
+                  class:list={[
+                    "branchline-nav__link",
+                    isCurrent && "branchline-nav__link--active",
+                  ]}
+                  href={section.href}
+                  aria-label={section.ariaLabel}
+                  aria-current={isCurrent ? "location" : undefined}
+                  data-active={isCurrent ? "true" : "false"}
+                  data-branchline-ref={section.ref}
+                  data-node={section.node}
+                >
+                  <span
+                    class:list={[
+                      "branchline-nav__node",
+                      `branchline-nav__node--${section.tone}`,
+                    ]}
+                    aria-hidden="true"
+                  />
+                  <span class="branchline-nav__label">{section.label}</span>
+                  <code>{shortRef(section.ref)}</code>
+                </a>
+              </li>
+            );
+          })
+        }
+      </ol>
+    </div>
+  </details>
+</nav>

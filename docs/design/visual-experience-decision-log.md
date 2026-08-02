@@ -1,0 +1,91 @@
+# Visual Experience Decision Log
+
+## Decision
+
+Git Fanta's Phase 2 visual language is **Branchline**: a conceptual route made
+from ordinary page anchors, commit-like nodes, authored refs, and restrained
+diff states. It makes the website feel native to a Git project while keeping
+the product content and navigation semantic.
+
+The visual layer is a showroom of design discipline. Its quality is measured by
+coherent contracts, readable fallbacks, and implementation constraints rather
+than by the number of effects on screen.
+
+## Prompt-level intent
+
+The design brief asks for a Git branch/tree metaphor that demonstrates strong
+AI-assisted UI composition. The implementation translates that intent into
+small named systems:
+
+- Branchline Navigation provides the primary route through the page.
+- Git Tree Reveal provides decorative continuity beside the content.
+- Commit resolve, branch trace, diff reveal, and ref transition form the motion
+  vocabulary.
+- Conceptual refs are visible metadata authored by the website, never live Git
+  telemetry.
+
+Each system has one primary component contract, a semantic fallback, and a
+bounded CSS surface.
+
+## Interaction decisions
+
+### Normal anchors remain the source of truth
+
+Branchline links point to real section IDs and expose `aria-current="location"`
+for the initial active node. A native `details` disclosure provides the mobile
+presentation without requiring JavaScript. The page never hijacks wheel input,
+forces scroll snapping, or hides the route behind hover.
+
+### CSS-first progressive reveal
+
+The static final state is present by default. Browsers supporting view timelines
+may animate transform and opacity as sections enter the viewport. Browsers
+without support see the same content and graph without a polyfill or runtime
+animation dependency. Reduced-motion users receive the static state and retain
+all anchors and content.
+
+### Decorative graph, semantic content
+
+The tree layer is explicitly `aria-hidden` and contains no meaningful copy. The
+adjacent section headings and paragraphs carry all information. Removing the
+graph therefore preserves the reading order, focus targets, and visual state
+meaning.
+
+## Rejected alternatives
+
+- A canvas or WebGL graph was rejected because it adds a rendering dependency,
+  complicates accessibility, and is unnecessary for a small branch grammar.
+- A full animation library was rejected because CSS timelines and short
+  transitions cover the intended motion vocabulary with less shipped code.
+- Scroll event loops and continuous `requestAnimationFrame` were rejected to
+  protect low-power devices and avoid main-thread work during navigation.
+- A custom cursor, autoplay video, audio, and large animated backgrounds were
+  rejected because they add visual noise and weight without improving the
+  information architecture.
+- A live GitHub branch/commit feed was rejected because Phase 2 is a static
+  authored metaphor and must not invent repository telemetry.
+- Award-site layouts, assets, and copy are not copied. The focused references
+  only inform principles such as menu disclosure, spatial hierarchy, and
+  progressive navigation.
+
+## Reference translation
+
+The interaction review looked at [Moha. Auf — Experience Expert](https://www.awwwards.com/sites/moha-auf-experience-expert)
+for menu/loading choreography, scroll animation, and portfolio navigation;
+[Awwwards dynamic-grid references](https://www.awwwards.com/websites/dynamic-grid-layout-examples/)
+for spatial hierarchy; and [Awwwards navigation and interaction references](https://www.awwwards.com/inspiration_search/sites_of_the_day/?page=320)
+for disclosure and transition patterns.
+
+The implementation constraints follow [MDN's scroll-driven animation guidance](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scroll-driven_animations/Timelines),
+[MDN's reduced-motion guidance](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion),
+[MDN's content-visibility guidance](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/content-visibility),
+and [web.dev's animation-performance guidance](https://web.dev/articles/animations-and-performance).
+
+## Review record
+
+- Layout review widths: 320px, 768px, and 1440px.
+- Automated coverage: unit model tests, static build, browser anchor and
+  disclosure tests, 320px overflow check, Axe coverage, and reduced-motion
+  verification.
+- Performance boundary: no new dependency, no remote asset, no client
+  directive, no canvas/WebGL, and no continuous scroll handler.
