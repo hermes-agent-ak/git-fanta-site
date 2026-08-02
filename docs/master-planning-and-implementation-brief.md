@@ -6,7 +6,8 @@ Create a modern, production-quality website for the Git Fanta desktop applicatio
 
 The website must demonstrate current frontend engineering, strong architectural decisions, GitHub ecosystem integration, accessibility, performance, CI/CD, automated release synchronization and maintainable TypeScript code.
 
-This is not a research task.
+This is not an open-ended research task. Focused design-reference research is
+allowed when explicitly requested by the visual-experience plan.
 
 The technology choices and architectural decisions in this brief are already approved. Do not replace them with different frameworks, hosting services or architectural patterns.
 
@@ -244,7 +245,78 @@ All animation must respect:
 prefers-reduced-motion
 ```
 
-## 8. Initial information architecture
+## 8. UI/UX quality bar and visual showroom
+
+The website is both the public Git Fanta site and a deliberate showroom for
+high-quality AI-assisted product design. AI assistance must be visible through
+the coherence of the system, the quality of the interaction decisions, and the
+clarity of the implementation—not through novelty claims or opaque generated
+markup. Every distinctive visual pattern must have a name, a reusable contract,
+an accessibility behavior, a performance budget, and a documented fallback.
+
+The visual language should treat Git as a design grammar:
+
+* a branchline is the primary visual route through the homepage;
+* commit nodes mark meaningful sections and provide anchor navigation;
+* branch refs label conceptual states such as `main`, `feature/ui`, and
+  `release/next` without pretending they are live repository data;
+* merge points introduce section transitions or comparisons;
+* diff-green, diff-red, orange, and neutral surfaces communicate state without
+  becoming decoration-only noise; and
+* tree connectors, terminal metadata, and patch-like reveals remain subordinate
+  to readable content and ordinary links.
+
+The signature navigation pattern is a responsive Branchline Navigation. On wide
+screens it may appear as a compact sticky rail or horizontal branch map. On
+small screens it must collapse into a normal, keyboard-operable anchor list or
+disclosure. The active section must be represented by a real anchor,
+`aria-current`, and a visible state; scrolling must never be hijacked.
+
+The signature motion pattern is a progressive Git Tree Reveal: connectors and
+commit nodes may draw or resolve as sections enter the viewport, while content
+remains present and usable before motion starts. CSS scroll-driven or view-driven
+timelines are preferred where supported; unsupported browsers receive the final
+static state. Motion must be limited to purposeful transitions such as
+`transform`, `opacity`, color, and small SVG stroke changes. Reduced-motion users
+receive an immediate static or low-motion presentation.
+
+The visual layer must remain lightweight enough for older and low-power devices:
+
+* no WebGL, canvas, autoplay video, large animated background, or full animation
+  library for the signature experience;
+* no runtime JavaScript for decorative motion when CSS can express it;
+* no remote font, analytics, or third-party visual dependency;
+* no `transition: all`, unbounded `will-change`, scroll event loop, or layout-heavy
+  animation as a default pattern;
+* use `content-visibility: auto` only for appropriate below-the-fold sections
+  with intrinsic sizing and an accessibility review; and
+* keep the visual phase progressive, so static HTML and normal links are always
+  the complete fallback.
+
+The design review bar is intentionally high: the implementation must be
+cohesive at 320, 768, and 1440 CSS pixels, communicate hierarchy without motion,
+feel recognizably Git Fanta rather than generic SaaS, and pass keyboard, Axe,
+reduced-motion, and performance checks before content work builds on it.
+
+The visual research baseline is focused rather than prescriptive. Awwwards
+references show useful patterns in menu/loading choreography, scroll animation,
+portfolio navigation, dynamic grids, and navigation transitions; they are
+references for interaction quality, not assets or layouts to copy:
+
+* [Moha. Auf — Experience Expert](https://www.awwwards.com/sites/moha-auf-experience-expert)
+  for menu/loading, scroll, and portfolio-navigation examples;
+* [Awwwards dynamic-grid references](https://www.awwwards.com/websites/dynamic-grid-layout-examples/)
+  for spatial hierarchy and responsive composition; and
+* [Awwwards navigation and interaction references](https://www.awwwards.com/inspiration_search/sites_of_the_day/?page=320)
+  for menu disclosure and transition patterns.
+
+The implementation should translate those observations into native CSS and
+semantic Astro rather than importing their technical weight. The technical
+baseline is supported by [MDN's scroll-driven animation guidance](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scroll-driven_animations/Timelines),
+[MDN's reduced-motion guidance](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion),
+and [web.dev's animation-performance guidance](https://web.dev/articles/animations-and-performance).
+
+## 9. Initial information architecture
 
 Version 1 should contain:
 
@@ -284,7 +356,7 @@ Product claims must be supported by the actual Git Fanta repository.
 
 Do not invent features that are not present in the desktop application.
 
-## 9. GitHub release integration
+## 10. GitHub release integration
 
 Release data must be fetched from the public GitHub REST API during the Astro production build.
 
@@ -375,7 +447,7 @@ Store a representative GitHub release fixture under the test or fixture director
 
 Production builds must not silently fall back to stale fixture data. A failed production API request should fail with a clear error while leaving the previously deployed GitHub Pages version untouched.
 
-## 10. Download experience
+## 11. Download experience
 
 The download component must support:
 
@@ -401,7 +473,7 @@ Browser operating-system detection may only be a convenience. The user must alwa
 
 Do not automatically begin a download.
 
-## 11. SEO and metadata
+## 12. SEO and metadata
 
 Implement:
 
@@ -422,7 +494,7 @@ Use the official Astro sitemap integration.
 
 The structured data must not include ratings, prices or operating-system support that cannot be proven.
 
-## 12. Accessibility requirements
+## 13. Accessibility requirements
 
 Target WCAG 2.2 AA.
 
@@ -446,7 +518,7 @@ Required checks:
 
 Integrate Axe into Playwright tests.
 
-## 13. Performance requirements
+## 14. Performance requirements
 
 The website must be fast on average hardware and slower networks.
 
@@ -475,7 +547,7 @@ Additional expectations:
 
 A small icon package is acceptable, but do not import an entire UI framework for a few icons.
 
-## 14. Repository quality requirements
+## 15. Repository quality requirements
 
 Create:
 
@@ -532,7 +604,7 @@ Install current stable versions for supporting packages not explicitly versioned
 
 Do not use floating GitHub Action references such as `@main`.
 
-## 15. GitHub Actions
+## 16. GitHub Actions
 
 Create a pull-request CI workflow that performs:
 
@@ -591,7 +663,7 @@ Design the configuration so a future custom domain can switch the base path to `
 
 Do not hard-code root-relative asset paths that break on GitHub project pages.
 
-## 16. Cross-repository release synchronization
+## 17. Cross-repository release synchronization
 
 After the website deployment works independently, extend the Git Fanta release workflow.
 
@@ -642,7 +714,7 @@ The release itself must remain successful even if the website dispatch temporari
 
 The website deployment must independently fetch the published release from GitHub. Do not trust release metadata supplied only through `client_payload`.
 
-## 17. Required implementation-plan decomposition
+## 18. Required implementation-plan decomposition
 
 Before changing application code, create these files:
 
@@ -650,12 +722,13 @@ Before changing application code, create these files:
 docs/implementation-plans/
 ├── 00-project-bootstrap.md
 ├── 01-design-system-and-layout.md
-├── 02-content-and-product-assets.md
-├── 03-github-release-integration.md
-├── 04-pages-and-interactivity.md
-├── 05-testing-quality-and-security.md
-├── 06-github-pages-deployment.md
-└── 07-cross-repository-release-trigger.md
+├── 02-visual-experience-and-motion.md
+├── 03-content-and-product-assets.md
+├── 04-github-release-integration.md
+├── 05-pages-and-interactivity.md
+├── 06-testing-quality-and-security.md
+├── 07-github-pages-deployment.md
+└── 08-cross-repository-release-trigger.md
 ```
 
 Each implementation plan must contain:
@@ -692,7 +765,7 @@ Handle errors.
 
 Replace them with precise actions and measurable acceptance criteria.
 
-## 18. Implementation order
+## 19. Implementation order
 
 Use this order:
 
@@ -704,37 +777,47 @@ Create the Astro repository, Node and pnpm configuration, strict TypeScript setu
 
 Create design tokens, global styles, base layout, header, footer, responsive container primitives, buttons, cards and accessibility foundations.
 
-### Phase 2 — Content and assets
+### Phase 2 — Visual experience and motion
+
+Implement the Branchline Navigation, Git Tree Reveal, conceptual branch refs,
+commit markers, diff-state language, responsive visual composition, progressive
+CSS motion, static fallbacks, and performance/accessibility contracts before
+product content or screenshots are added.
+
+### Phase 3 — Content and assets
 
 Inspect the Git Fanta repository for accurate product descriptions, logo files and screenshots. Copy only required assets while preserving attribution and licensing information.
 
 Do not invent missing screenshots. Use explicit placeholders marked for replacement if authentic screenshots are not available locally.
 
-### Phase 3 — Release data
+### Phase 4 — Release data
 
 Implement GitHub API fetching, Zod schemas, normalization, asset classification, fixture mode, formatting utilities and unit tests.
 
-### Phase 4 — Pages
+### Phase 5 — Pages
 
 Build the homepage, download page, 404 page, metadata, structured data and the minimal React download island.
 
-### Phase 5 — Quality
+### Phase 6 — Quality
 
 Add ESLint, Prettier, Vitest, Playwright, Axe, performance checks, Dependabot and dependency review.
 
-### Phase 6 — Deployment
+### Phase 7 — Deployment
 
 Add GitHub Pages configuration and deployment workflow. Verify project-subpath routing and static assets.
 
-### Phase 7 — Repository integration
+### Phase 8 — Repository integration
 
 Update the Git Fanta release workflow to dispatch a website rebuild after a release is published. Update the Git Fanta README and repository metadata to point to the new website only after the site is live.
 
-## 19. Codex operating instructions
+## 20. Codex operating instructions
 
 First inspect the local repositories and report material differences from this brief.
 
-Do not perform general web research.
+Do not perform general web research for implementation facts. When a plan
+explicitly requests focused design-reference research, inspect authoritative
+award/reference pages, record the relevant URLs and observations in that plan,
+and convert them into concrete accessibility and performance constraints.
 
 Use this document as the architectural source of truth.
 
@@ -779,7 +862,7 @@ Do not:
 
 When a remote-only step cannot be completed locally, implement the repository files and document the exact manual GitHub configuration required.
 
-## 20. Final definition of done
+## 21. Final definition of done
 
 The project is complete when:
 
@@ -794,6 +877,8 @@ The project is complete when:
 * unsigned-build warnings are visible
 * the site works under the GitHub Pages project subpath
 * the site is responsive
+* the Branchline Navigation and Git Tree visual language are coherent,
+  keyboard-operable, progressively enhanced, and performance-bounded
 * keyboard navigation works
 * reduced-motion preferences are respected
 * automated accessibility tests pass

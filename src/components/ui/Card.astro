@@ -1,0 +1,33 @@
+---
+type CardTone = "default" | "accent" | "success" | "warning" | "danger";
+
+interface Props {
+  tone?: CardTone;
+  interactive?: boolean;
+}
+
+const { tone = "default", interactive = false } = Astro.props;
+
+const toneClasses: Record<CardTone, string> = {
+  default: "border-border-normal bg-bg-surface",
+  accent: "border-accent-orange bg-bg-surface",
+  success: "border-status-success bg-bg-surface",
+  warning: "border-status-warning bg-bg-surface",
+  danger: "border-status-danger bg-bg-surface",
+};
+
+const interactiveClasses = interactive
+  ? "transition-colors duration-150 hover:border-accent-orange focus-within:border-accent-orange"
+  : "";
+---
+
+<article
+  class:list={[
+    "rounded-lg border p-6 shadow-sm",
+    toneClasses[tone],
+    interactiveClasses,
+  ]}
+  data-interactive={interactive ? "true" : undefined}
+>
+  <slot />
+</article>
