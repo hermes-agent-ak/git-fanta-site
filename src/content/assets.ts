@@ -72,9 +72,7 @@ export const assetManifest = [
 
 function isSafeRelativePath(path: string): boolean {
   return (
-    path.length > 0 &&
-    !path.startsWith("/") &&
-    !path.split("/").some((segment) => segment === "..")
+    path.length > 0 && !path.startsWith("/") && !path.split("/").includes("..")
   );
 }
 
@@ -90,71 +88,112 @@ function hasExplicitText(value: unknown): value is string {
 export function validateAssetManifest(
   manifest: readonly AssetRecord[],
 ): string[] {
+  return manifest.flatMap((asset) => validateAsset(asset));
+}
+
+function validateAsset(asset: AssetRecord): string[] {
+  const label = asset.id || "unnamed";
+
+  return [
+    ...validateAssetIdentity(asset, label),
+    ...validateAssetDerivation(asset, label),
+    ...validateAssetDescription(asset, label),
+    ...validateAssetPublication(asset, label),
+  ];
+}
+
+function validateAssetIdentity(asset: AssetRecord, label: string): string[] {
   const issues: string[] = [];
 
-  manifest.forEach((asset) => {
-    const label = asset.id || "unnamed";
-
-    if (!asset.id.trim()) {
-      issues.push("asset missing id");
-    }
-    if (!asset.sourceRepository.trim()) {
-      issues.push(`asset "${label}": missing source repository`);
-    }
-    if (!asset.sourcePath || !isSafeRelativePath(asset.sourcePath)) {
-      issues.push(`asset "${label}": missing or unsafe source path`);
-    }
-    if (
-      asset.derivedFrom.some((sourcePath) => !isSafeRelativePath(sourcePath))
-    ) {
-      issues.push(`asset "${label}": unsafe derived input path`);
-    }
-    if (asset.derivedFrom.length > 0 && !asset.transformation?.trim()) {
-      issues.push(
-        `asset "${label}": derived asset missing transformation note`,
-      );
-    }
-    if (!hasExplicitText(asset.altText)) {
-      issues.push(`asset "${label}": missing alternative-text decision`);
-    }
-
-    if (asset.status === "pending" && asset.targetPath !== null) {
-      issues.push(`asset "${label}": pending asset must not have target path`);
-    }
-
-    if (asset.status !== "ready") return;
-
-    if (!asset.targetPath || !isSafeRelativePath(asset.targetPath)) {
-      issues.push(
-        `asset "${label}": ready asset has missing or unsafe target path`,
-      );
-    }
-    if (!asset.license.trim()) {
-      issues.push(`asset "${label}": ready asset missing licence`);
-    }
-    if (!asset.attribution.trim()) {
-      issues.push(`asset "${label}": ready asset missing attribution`);
-    }
-
-    if (
-      asset.kind === "logo" &&
-      asset.targetPath !== null &&
-      !isWithinDirectory(asset.targetPath, "public/brand")
-    ) {
-      issues.push(
-        `asset "${label}": logo target must remain under public/brand`,
-      );
-    }
-    if (
-      asset.kind === "screenshot" &&
-      asset.targetPath !== null &&
-      !isWithinDirectory(asset.targetPath, "public/product")
-    ) {
-      issues.push(
-        `asset "${label}": screenshot target must remain under public/product`,
-      );
-    }
-  });
+  if (!asset.id.trim()) {
+    issues.push("asset missing id");
+  }
+  if (!asset.sourceRepository.trim()) {
+    issues.push(`asset "${label}": missing source repository`);
+  }
+  if (!asset.sourcePath || !isSafeRelativePath(asset.sourcePath)) {
+    issues.push(`asset "${label}": missing or unsafe source path`);
+  }
 
   return issues;
+}
+
+function validateAssetDerivation(asset: AssetRecord, label: string): string[] {
+  const issues: string[] = [];
+
+  if (asset.derivedFrom.some((sourcePath) => !isSafeRelativePath(sourcePath))) {
+    issues.push(`asset "${label}": unsafe derived input path`);
+  }
+  if (asset.derivedFrom.length > 0 && !asset.transformation?.trim()) {
+    issues.push(`asset "${label}": derived asset missing transformation note`);
+  }
+
+  return issues;
+}
+
+function validateAssetDescription(asset: AssetRecord, label: string): string[] {
+  if (hasExplicitText(asset.altText)) {
+    return [];
+  }
+
+  return [`asset "${label}": missing alternative-text decision`];
+}
+
+function validateAssetPublication(asset: AssetRecord, label: string): string[] {
+  if (asset.status === "pending") {
+    return asset.targetPath === null
+      ? []
+      : [`asset "${label}": pending asset must not have target path`];
+  }
+  if (asset.status !== "ready") {
+    return [];
+  }
+
+  return [
+    ...validateReadyAssetMetadata(asset, label),
+    ...validateReadyAssetTarget(asset, label),
+  ];
+}
+
+function validateReadyAssetMetadata(
+  asset: AssetRecord,
+  label: string,
+): string[] {
+  const issues: string[] = [];
+
+  if (!asset.targetPath || !isSafeRelativePath(asset.targetPath)) {
+    issues.push(
+      `asset "${label}": ready asset has missing or unsafe target path`,
+    );
+  }
+  if (!asset.license.trim()) {
+    issues.push(`asset "${label}": ready asset missing licence`);
+  }
+  if (!asset.attribution.trim()) {
+    issues.push(`asset "${label}": ready asset missing attribution`);
+  }
+
+  return issues;
+}
+
+function validateReadyAssetTarget(asset: AssetRecord, label: string): string[] {
+  if (asset.targetPath === null) {
+    return [];
+  }
+  if (
+    asset.kind === "logo" &&
+    !isWithinDirectory(asset.targetPath, "public/brand")
+  ) {
+    return [`asset "${label}": logo target must remain under public/brand`];
+  }
+  if (
+    asset.kind === "screenshot" &&
+    !isWithinDirectory(asset.targetPath, "public/product")
+  ) {
+    return [
+      `asset "${label}": screenshot target must remain under public/product`,
+    ];
+  }
+
+  return [];
 }
