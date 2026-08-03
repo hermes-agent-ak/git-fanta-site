@@ -5,6 +5,8 @@ import {
   navigationHref,
   type NavigationItem,
 } from "../../lib/navigation";
+import { assetManifest } from "../../content/assets";
+import { product } from "../../content/product";
 import { siteHref } from "../../lib/site-url";
 
 interface Props {
@@ -13,6 +15,16 @@ interface Props {
 
 const { baseUrl = import.meta.env.BASE_URL } = Astro.props;
 const currentPath = Astro.url.pathname;
+const brandLogo = assetManifest.find((asset) => asset.id === "brand-logo");
+
+if (!brandLogo || brandLogo.status !== "ready" || !brandLogo.targetPath) {
+  throw new Error("The ready brand logo is missing from the asset manifest.");
+}
+
+const brandLogoHref = siteHref(
+  brandLogo.targetPath.replace(/^public/, ""),
+  baseUrl,
+);
 
 function normalizedPath(path: string): string {
   const withoutHash = path.split("#", 1)[0] ?? "/";
@@ -36,11 +48,18 @@ function isCurrent(item: NavigationItem): boolean {
   <Container size="xl">
     <div class="flex flex-wrap items-center justify-between gap-4 py-5">
       <a
-        class="brand-link rounded-sm text-lg font-extrabold tracking-tight text-fg-primary no-underline hover:text-accent-orange"
+        class="brand-link inline-flex items-center gap-3 rounded-sm text-lg font-extrabold tracking-tight text-fg-primary no-underline hover:text-accent-orange"
         href={siteHref("/", baseUrl)}
-        aria-label="Git Fanta home"
+        aria-label={`${product.name} home`}
       >
-        Git Fanta
+        <img
+          class="brand-logo h-10 w-10 shrink-0 object-contain sm:h-12 sm:w-12 lg:h-14 lg:w-14"
+          src={brandLogoHref}
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+        />
+        <span>{product.name}</span>
       </a>
       <nav aria-label="Primary">
         <ul

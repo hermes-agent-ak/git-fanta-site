@@ -1,10 +1,10 @@
 ---
-status: planned
+status: complete
 phase: 2
 depends_on:
   - docs/implementation-plans/01-design-system-and-layout.md
 implementation_branch: feature/phase-2-visual-experience-and-motion
-base_branch: feature/phase-1-design-system-and-layout
+base_branch: dev
 target_branch: dev
 ---
 
@@ -32,12 +32,15 @@ pretend to be live repository data or replace ordinary content navigation.
 - Phase 1 provides semantic tokens, global accessibility defaults, BaseLayout,
   SkipLink, Container, Button, Card, SiteHeader, SiteFooter, and the shared
   navigation contract.
-- The bootstrap page currently contains a clearly labelled temporary foundation
-  preview and has no final product content or authentic product assets.
+- At Phase 2 start, the bootstrap page contained a clearly labelled temporary
+  foundation preview and no final product content or authentic product assets.
+  The implementation retains that boundary while composing the visual
+  showroom around it.
 - `src/styles/global.css` is the existing design-token and reduced-motion seam;
   Phase 2 should extend it rather than introduce a competing styling contract.
-- There is no visual graph component, section model, branchline navigation,
-  commit marker, scroll-driven motion, or design decision log yet.
+- At Phase 2 start, there was no visual graph component, section model,
+  Branchline Navigation, commit marker, scroll-driven motion, or design
+  decision log. The implementation now provides each of these artifacts.
 - The website is static Astro output. React remains reserved for a later useful
   download island and must not be introduced for decorative motion.
 - Phase 1 already proves the project-base URL contract, keyboard order, Axe
@@ -58,6 +61,29 @@ pretend to be live repository data or replace ordinary content navigation.
   [MDN's reduced-motion guidance](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion),
   [MDN's `content-visibility` guidance](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/content-visibility),
   and [web.dev's animation-performance guidance](https://web.dev/articles/animations-and-performance).
+
+## Implemented result
+
+- `experienceSections` is the single readonly source for five conceptual
+  anchors, refs, node kinds, tones, and accessible labels.
+- `BranchlineNav.astro` renders ordinary anchors with a validated server-side
+  fallback. The active state is owned by `data-active`; `aria-current` mirrors
+  it, and CSS consumes the same attribute.
+- `branchline-enhancement.ts` adds click synchronization and one bounded
+  `IntersectionObserver` for normal scrolling. It is 1,398 source bytes and
+  never replaces native navigation. Its state transitions are covered through
+  an injected root/view contract, while browser wiring remains covered by
+  Playwright.
+- `GitTreeReveal.astro` and `CommitMarker.astro` remain decorative and have no
+  independent navigation-active state.
+- The decision log documents state ownership, rejected alternatives, and the
+  performance/accessibility translation of the focused reference research.
+- The implementation passes 14 unit tests, 13 browser tests, 3 Axe-tagged
+  tests, formatting, lint, type-check, build, and diff validation. The
+  SonarQube workflow generates and imports LCOV coverage before analysis;
+  declarative Astro/CSS repetition is excluded from copy-paste detection while
+  TypeScript source remains measured. The local coverage run reports 96.13%
+  line coverage.
 
 ## Scope
 
@@ -213,8 +239,10 @@ logo, release data, or unsupported product claim.
   hover-only content, or navigation that requires JavaScript.
 - Do not replace BaseLayout, siteHref, the shared navigation contract, or the
   Phase 1 accessibility rules.
-- Do not change the Git Fanta application repository, GitHub Actions, release
-  API, deployment workflow, or SonarQube trust boundary.
+- Do not change the Git Fanta application repository, release API, or
+  deployment workflow. The SonarQube coverage handoff in
+  `.github/workflows/build.yml` and its explicit source/test boundaries are
+  allowed; the existing SonarQube trust boundary remains unchanged.
 - Do not add pixel-perfect snapshot tests or treat award references as assets to
   copy.
 
@@ -251,9 +279,12 @@ logo, release data, or unsupported product claim.
 - `src/components/visual/GitTreeReveal.astro` — decorative branch/tree layer.
 - `src/components/visual/CommitMarker.astro` — semantic-looking visual marker
   with an explicit decorative/accessibility contract.
-- `src/components/visual/branchline-enhancement.ts` — optional active-section
-  observer enhancement; omit this file when CSS and native anchors are enough.
+- `src/components/visual/branchline-enhancement.ts` — bounded active-section
+  observer enhancement that keeps the visual marker synchronized after clicks
+  and during normal scrolling.
 - `tests/unit/experience-sections.test.ts` — section model and ref policy tests.
+- `tests/unit/branchline-enhancement.test.ts` — injected DOM/view state tests
+  for click and observer synchronization.
 - `tests/e2e/visual-experience.spec.ts` — browser, keyboard, responsive, motion,
   fallback, and accessibility coverage.
 
@@ -269,6 +300,13 @@ logo, release data, or unsupported product claim.
   labelled temporary sections.
 - `tests/e2e/bootstrap.spec.ts` — preserve the compatibility smoke assertions
   or move equivalent coverage without weakening it.
+- `package.json` and `pnpm-lock.yaml` — add the V8 coverage provider and the
+  coverage test script.
+- `vitest.config.ts` — scope LCOV generation to measured TypeScript source.
+- `sonar-project.properties` — declare source/test boundaries, LCOV import,
+  and presentation-layer copy-paste exclusions.
+- `.github/workflows/build.yml` — install dependencies and generate coverage
+  before the trusted SonarQube scan.
 - `docs/implementation-plans/01-design-system-and-layout.md` — only if the
   Phase 1 follow-up contract needs a factual completion note.
 
@@ -314,8 +352,9 @@ automated reduced-motion assertion.
 
 ### Step 0 — Verify the phase boundary and reference audit
 
-1. Confirm the branch is based on the pushed Phase 1 commit and the working tree
-   contains no unrelated changes.
+1. Confirm the branch is based on the current dev branch, which contains the
+   merged Phase 1 foundation, and the working tree contains no unrelated
+   changes.
 2. Re-read the Phase 1 component and URL contracts before editing.
 3. Record only the interaction lessons from the award references in the design
    decision log: menu choreography, section navigation, dynamic spatial layout,
@@ -351,8 +390,9 @@ automated reduced-motion assertion.
    and keyboard order. Before `BranchlineNav.astro` exists, the exact
    `getByRole("navigation", { name: "Branchline" })` assertion must fail with
    `Expected: 1` and `Received: 0`.
-2. GREEN: implement `BranchlineNav.astro` with ordinary anchors and an optional
-   small IntersectionObserver progressive enhancement.
+2. GREEN: implement `BranchlineNav.astro` with ordinary anchors and the small
+   IntersectionObserver progressive enhancement. Keep the anchors as the source
+   of truth when the script is unavailable.
 3. Verify keyboard navigation without JavaScript and verify that focus rings do
    not clip against the branch rail.
 
@@ -422,12 +462,13 @@ Run commands from the repository root on the Phase 2 branch.
     pnpm lint
     pnpm check
     pnpm test:unit
+    pnpm test:unit:coverage
     pnpm test:e2e
     pnpm test:a11y
     pnpm build
     git diff --check
 
-If the optional active-section module exists, also run:
+The implemented active-section module must remain within its source budget:
 
     test "$(wc -c < src/components/visual/branchline-enhancement.ts)" -le 3072
 
@@ -473,9 +514,8 @@ dependency for this phase.
   request is introduced by the visual phase.
 - Assert the visual layer has no client directive and no continuous scroll loop.
 - Inspect animation declarations and allow only the documented motion properties.
-- Verify the optional active-section module stays below 3072 source bytes if it
-  is implemented; remove it if static CSS/anchor behavior is sufficient. The
-  bounded `wc -c` command above is the required check.
+- Verify the active-section module stays below 3072 source bytes. Native CSS
+  anchors remain the fallback if the module is unavailable.
 - Verify the production output remains static and base-path-safe.
 - Defer the full Lighthouse >=95 gate to Phase 6 while preserving the
   architecture needed to meet it.
@@ -509,9 +549,9 @@ dependency for this phase.
   content, navigation, focus, and state information.
 - No scroll hijacking, canvas/WebGL, autoplay video, full animation library,
   remote font, or large visual dependency is introduced.
-- Any active-section JavaScript is optional, uses a bounded observer rather than
-  a continuous scroll loop, and stays below the documented 3072-byte source
-  budget.
+- The active-section JavaScript uses one bounded observer rather than a
+  continuous scroll loop, stays below the documented 3072-byte source budget,
+  and cannot create a second visual active-state contract.
 - The visual layer passes unit, browser, keyboard, Axe, reduced-motion, narrow
   viewport, static-output, and diff checks.
 - Phase 3 can add authentic product content and screenshots without replacing
@@ -574,6 +614,9 @@ dependency for this phase.
 - Normal anchors, keyboard navigation, focus indicators, mobile behavior, Axe,
   reduced motion, and static fallbacks pass.
 - The performance budgets and no-live-Git-data boundary pass review.
+- SonarQube receives LCOV coverage from the trusted analysis workflow and the
+  configured new-code quality gate remains green without weakening TypeScript
+  coverage measurement.
 - Phase 3 can consume the visual system without a layout rewrite.
 - The plan is changed from planned to complete only after all acceptance criteria
   and review gates pass.

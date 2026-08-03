@@ -1,0 +1,44 @@
+---
+import CommitMarker from "./CommitMarker.astro";
+import type {
+  ExperienceSection,
+  ExperienceTone,
+} from "../../lib/experience-sections";
+
+interface Props {
+  sections: readonly ExperienceSection[];
+  branch?: string;
+  tone?: ExperienceTone;
+  decorative?: boolean;
+}
+
+const {
+  sections,
+  branch = "main",
+  tone = "orange",
+  decorative = true,
+} = Astro.props;
+---
+
+<div
+  class:list={["git-tree", `git-tree--${tone}`]}
+  data-visual="git-tree"
+  data-branch={branch}
+  aria-hidden={decorative ? "true" : undefined}
+>
+  <div class="git-tree__trace" data-motion="branch-trace"></div>
+  <ol class="git-tree__nodes">
+    {
+      sections.map((section, index) => (
+        <li
+          class="git-tree__node"
+          data-section-id={section.id}
+          data-motion="commit-resolve"
+          style={`--section-index: ${index}`}
+        >
+          <CommitMarker node={section.node} tone={section.tone} />
+        </li>
+      ))
+    }
+  </ol>
+</div>

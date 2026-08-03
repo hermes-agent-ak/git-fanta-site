@@ -9,6 +9,7 @@ export default defineConfig(
     ignores: [
       ".astro/**",
       "dist/**",
+      "coverage/**",
       "node_modules/**",
       "playwright-report/**",
       "test-results/**",

@@ -1,0 +1,23 @@
+---
+import type {
+  ExperienceNode,
+  ExperienceTone,
+} from "../../lib/experience-sections";
+
+interface Props {
+  node: ExperienceNode;
+  tone: ExperienceTone;
+  decorative?: boolean;
+}
+
+const { node, tone, decorative = true } = Astro.props;
+---
+
+<span
+  class:list={[
+    "commit-marker",
+    `commit-marker--${node}`,
+    `commit-marker--${tone}`,
+  ]}
+  data-commit-marker
+  aria-hidden={decorative ? "true" : undefined}></span>

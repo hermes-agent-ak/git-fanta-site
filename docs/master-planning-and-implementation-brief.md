@@ -545,6 +545,12 @@ Additional expectations:
 * no large component library
 * no full GitHub Primer CSS dependency
 
+SonarQube analysis must receive an LCOV report generated in the trusted build
+workflow. Source and test boundaries must be explicit; declarative Astro/CSS
+presentation repetition may be excluded from copy-paste detection, but typed
+application logic must remain covered by tests. The new-code quality gate is a
+release-blocking check.
+
 A small icon package is acceptable, but do not import an entire UI framework for a few icons.
 
 ## 15. Repository quality requirements
@@ -616,6 +622,10 @@ Create a pull-request CI workflow that performs:
 6. production build
 7. Playwright smoke tests
 8. accessibility tests
+
+The trusted SonarQube workflow runs the unit coverage command before analysis
+and imports `coverage/lcov.info`; it must not rely on a dashboard-side default
+or on a locally generated, untracked report.
 
 Use concurrency cancellation for superseded pull-request runs.
 
@@ -790,6 +800,11 @@ Inspect the Git Fanta repository for accurate product descriptions, logo files a
 
 Do not invent missing screenshots. Use explicit placeholders marked for replacement if authentic screenshots are not available locally.
 
+When project-owner media is supplied, Phase 3 may prepare a clearly labelled
+derived showcase from the supplied logo and screenshot. Preserve both inputs,
+record the transformation and permission, and never present the composite as
+an independently verified application screenshot.
+
 ### Phase 4 — Release data
 
 Implement GitHub API fetching, Zod schemas, normalization, asset classification, fixture mode, formatting utilities and unit tests.
@@ -809,6 +824,21 @@ Add GitHub Pages configuration and deployment workflow. Verify project-subpath r
 ### Phase 8 — Repository integration
 
 Update the Git Fanta release workflow to dispatch a website rebuild after a release is published. Update the Git Fanta README and repository metadata to point to the new website only after the site is live.
+
+### Current implementation status
+
+- Phase 0 — bootstrap: complete and merged into `dev`.
+- Phase 1 — design foundation: complete and merged into `dev`.
+- Phase 2 — visual experience and motion: implemented and validated on
+  `feature/phase-2-visual-experience-and-motion`; its Branchline state contract,
+  decorative graph boundary, and performance budget are documented in the Phase
+  2 plan and decision log.
+* Phase 3 — content and product assets: implemented and validated on
+  `feature/phase-3-content-and-product-assets`, based on the completed Phase 2
+  branch. Its source-backed logo, content provenance, pending-media gates, and
+  owner-requested derived showcase are documented in the Phase 3 plan and
+  asset ledger. The website brand uses the project-owner supplied vectorized
+  SVG derived from the supplied PNG rather than the older application SVG.
 
 ## 20. Codex operating instructions
 
