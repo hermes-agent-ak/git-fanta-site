@@ -800,6 +800,11 @@ Inspect the Git Fanta repository for accurate product descriptions, logo files a
 
 Do not invent missing screenshots. Use explicit placeholders marked for replacement if authentic screenshots are not available locally.
 
+When project-owner media is supplied, Phase 3 may prepare a clearly labelled
+derived showcase from the supplied logo and screenshot. Preserve both inputs,
+record the transformation and permission, and never present the composite as
+an independently verified application screenshot.
+
 ### Phase 4 — Release data
 
 Implement GitHub API fetching, Zod schemas, normalization, asset classification, fixture mode, formatting utilities and unit tests.
@@ -828,11 +833,12 @@ Update the Git Fanta release workflow to dispatch a website rebuild after a rele
   `feature/phase-2-visual-experience-and-motion`; its Branchline state contract,
   decorative graph boundary, and performance budget are documented in the Phase
   2 plan and decision log.
-- Phase 3 — content and product assets: plan reviewed and marked
-  ready-for-implementation on
+* Phase 3 — content and product assets: implemented and validated on
   `feature/phase-3-content-and-product-assets`, based on the completed Phase 2
-  branch. Its source-backed logo, content provenance, and pending-media gates
-  remain the next implementation boundary.
+  branch. Its source-backed logo, content provenance, pending-media gates, and
+  owner-requested derived showcase are documented in the Phase 3 plan and
+  asset ledger. The website brand uses the project-owner supplied vectorized
+  SVG derived from the supplied PNG rather than the older application SVG.
 
 ## 20. Codex operating instructions
 
