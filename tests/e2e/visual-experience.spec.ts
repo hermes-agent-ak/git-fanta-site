@@ -110,4 +110,12 @@ test.describe("Branchline visual experience", () => {
     expect(Number(motionState.opacity)).toBeGreaterThan(0);
     await expect(page.locator("#main-content")).toBeVisible();
   });
+
+  test("renders the fixture release version in the handoff section", async ({
+    page,
+  }) => {
+    await expect(page.locator("#handoff")).toContainText(
+      "Latest release: 1.0.2",
+    );
+  });
 });

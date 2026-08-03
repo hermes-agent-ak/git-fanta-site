@@ -1,0 +1,73 @@
+{
+  "tag_name": "v1.0.2",
+  "name": "Git Fanta v1.0.2",
+  "body": "A representative fixture for deterministic website builds and tests.",
+  "html_url": "https://github.com/hermes-agent-ak/git-fanta/releases/tag/v1.0.2",
+  "published_at": "2026-07-31T12:00:00Z",
+  "assets": [
+    {
+      "id": 1001,
+      "name": "git-fanta-v1.0.2-windows-x86_64-installer.exe",
+      "browser_download_url": "https://github.com/hermes-agent-ak/git-fanta/releases/download/v1.0.2/git-fanta-v1.0.2-windows-x86_64-installer.exe",
+      "size": 52428800,
+      "download_count": 12,
+      "content_type": "application/vnd.microsoft.portable-executable"
+    },
+    {
+      "id": 1002,
+      "name": "git-fanta-v1.0.2-linux-x86_64.AppImage",
+      "browser_download_url": "https://github.com/hermes-agent-ak/git-fanta/releases/download/v1.0.2/git-fanta-v1.0.2-linux-x86_64.AppImage",
+      "size": 47185920,
+      "download_count": 9,
+      "content_type": "application/octet-stream"
+    },
+    {
+      "id": 1003,
+      "name": "git-fanta-v1.0.2-linux-x86_64.tar.gz",
+      "browser_download_url": "https://github.com/hermes-agent-ak/git-fanta/releases/download/v1.0.2/git-fanta-v1.0.2-linux-x86_64.tar.gz",
+      "size": 41943040,
+      "download_count": 7,
+      "content_type": "application/gzip"
+    },
+    {
+      "id": 1004,
+      "name": "git-fanta-v1.0.2-macos.zip",
+      "browser_download_url": "https://github.com/hermes-agent-ak/git-fanta/releases/download/v1.0.2/git-fanta-v1.0.2-macos.zip",
+      "size": 39845888,
+      "download_count": 5,
+      "content_type": "application/zip"
+    },
+    {
+      "id": 1005,
+      "name": "git_fanta-1.0.2-py3-none-any.whl",
+      "browser_download_url": "https://github.com/hermes-agent-ak/git-fanta/releases/download/v1.0.2/git_fanta-1.0.2-py3-none-any.whl",
+      "size": 131072,
+      "download_count": 3,
+      "content_type": "application/zip"
+    },
+    {
+      "id": 1006,
+      "name": "git_fanta-1.0.2.tar.gz",
+      "browser_download_url": "https://github.com/hermes-agent-ak/git-fanta/releases/download/v1.0.2/git_fanta-1.0.2.tar.gz",
+      "size": 98304,
+      "download_count": 2,
+      "content_type": "application/gzip"
+    },
+    {
+      "id": 1007,
+      "name": "SHA256SUMS",
+      "browser_download_url": "https://github.com/hermes-agent-ak/git-fanta/releases/download/v1.0.2/SHA256SUMS",
+      "size": 1024,
+      "download_count": 4,
+      "content_type": "text/plain"
+    },
+    {
+      "id": 1008,
+      "name": "release-notes.txt",
+      "browser_download_url": "https://github.com/hermes-agent-ak/git-fanta/releases/download/v1.0.2/release-notes.txt",
+      "size": 512,
+      "download_count": 1,
+      "content_type": "text/plain"
+    }
+  ]
+}
