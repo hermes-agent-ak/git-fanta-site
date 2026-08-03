@@ -777,7 +777,18 @@ Replace them with precise actions and measurable acceptance criteria.
 
 ## 19. Implementation order
 
-Use this order:
+Use this architectural order unless an explicitly reviewed execution promotion
+changes the next implementable phase:
+
+```text
+0 → 1 → 2 → 3 → 7 → 4 → 5 → 6 → 8
+```
+
+Phase 7 is intentionally promoted after Phase 3 so the current static site can
+be published before release data, final page composition, quality expansion,
+or cross-repository release triggering are implemented. The numbered phases
+remain unchanged; this is an execution-order decision. Phase 7 depends only on
+the static Astro foundation and the current Phase 3 content/assets.
 
 ### Phase 0 — Bootstrap
 
@@ -817,9 +828,12 @@ Build the homepage, download page, 404 page, metadata, structured data and the m
 
 Add ESLint, Prettier, Vitest, Playwright, Axe, performance checks, Dependabot and dependency review.
 
-### Phase 7 — Deployment
+### Phase 7 — Deployment (promoted next)
 
-Add GitHub Pages configuration and deployment workflow. Verify project-subpath routing and static assets.
+Add GitHub Pages configuration and deployment workflow. Verify project-subpath
+routing and static assets. Execute this phase immediately after Phase 3 so the
+current page can be deployed as a visible milestone; it must not wait for the
+later release-data, final-pages, or cross-repository integration phases.
 
 ### Phase 8 — Repository integration
 
@@ -839,6 +853,14 @@ Update the Git Fanta release workflow to dispatch a website rebuild after a rele
   owner-requested derived showcase are documented in the Phase 3 plan and
   asset ledger. The website brand uses the project-owner supplied vectorized
   SVG derived from the supplied PNG rather than the older application SVG.
+- Phase 7 — GitHub Pages deployment: promoted as the next implementation phase.
+  The current repository has no deployment workflow yet; the existing static
+  page, base-path-safe Astro configuration, CI, and verified Phase 3 assets are
+  the implementation inputs for the promoted deployment slice.
+- Phases 4–6 and 8 remain planned and are deferred until the independent site
+  deployment is working. Phase 8 must remain after deployment because it
+  extends the application release workflow only after the website has a live
+  destination.
 
 ## 20. Codex operating instructions
 

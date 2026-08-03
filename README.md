@@ -75,6 +75,13 @@ The initial deployment must work at:
 https://hermes-agent-ak.github.io/git-fanta-site/
 ```
 
+The deployment workflow in `.github/workflows/deploy-pages.yml` publishes the
+site from `main` through GitHub Actions. For the first deployment, open
+**Settings → Pages → Build and deployment → Source** and select **GitHub
+Actions**. The workflow can also be started with `workflow_dispatch` for
+recovery without creating a new commit; the `github-pages` environment may
+require approval for its first production deployment.
+
 Astro's `site` and `base` configuration will be environment-aware so a future custom domain can use `/` without rewriting application components. Internal links and assets must not rely on root-relative paths that break under the project subpath.
 
 ### Node 24 and pnpm 11.4
