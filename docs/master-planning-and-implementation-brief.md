@@ -254,6 +254,22 @@ clarity of the implementation—not through novelty claims or opaque generated
 markup. Every distinctive visual pattern must have a name, a reusable contract,
 an accessibility behavior, a performance budget, and a documented fallback.
 
+The intended quality bar is clean, award-level product design: deliberate
+hierarchy, confident typography, disciplined spacing, precise microcopy,
+responsive composition, and interactions that feel impressive because they
+serve a clear product purpose. The site is a discreet showroom for demonstrating
+strong AI-assisted UI/UX work. It may include memorable, boast-worthy details,
+but every such detail must improve orientation, trust, product understanding, or
+download confidence. Novelty-only decoration, fake product capability, and
+interaction friction are not acceptable showroom features.
+
+Phase 5 therefore requires intensive experience planning before implementation.
+For each distinctive page pattern, the plan must define its user purpose,
+content and state model, semantic HTML, keyboard behavior, screen-reader
+behavior, reduced-motion behavior, no-JavaScript fallback, responsive behavior,
+and a bounded performance budget. The implementation must be reviewable as a
+coherent system rather than as a collection of isolated visual effects.
+
 The visual language should treat Git as a design grammar:
 
 * a branchline is the primary visual route through the homepage;
@@ -297,6 +313,20 @@ The design review bar is intentionally high: the implementation must be
 cohesive at 320, 768, and 1440 CSS pixels, communicate hierarchy without motion,
 feel recognizably Git Fanta rather than generic SaaS, and pass keyboard, Axe,
 reduced-motion, and performance checks before content work builds on it.
+
+Accessibility is a first-order product and showroom requirement. Target WCAG
+2.2 Level AA, and use EN 301 549-informed practices where the web experience is
+covered by the relevant accessibility requirements. Design and test the pages
+for keyboard and screen-reader use, zoom and reflow, text spacing, high
+contrast/forced-colors conditions where practical, reduced motion, touch input,
+error states, disabled states, and download uncertainty. Do not make a legal
+conformance claim without a separate applicability and accessibility audit.
+The [European Accessibility Act, Directive (EU) 2019/882](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32019L0882)
+and the [Web Accessibility Directive, Directive (EU) 2016/2102](https://eur-lex.europa.eu/eli/dir/2016/2102/oj/eng)
+are treated as EU-oriented engineering context, not as an assumption that this
+private project website automatically falls within either directive. The
+[ETSI accessibility resources](https://www.etsi.org/accessibility/) provide the
+relevant standards context.
 
 The visual research baseline is focused rather than prescriptive. Awwwards
 references show useful patterns in menu/loading choreography, scroll animation,
@@ -870,7 +900,10 @@ Update the Git Fanta release workflow to dispatch a website rebuild after a rele
   contracts are implemented and verified.
 - Phase 5 — pages and interactivity: next implementation phase. It will consume
   the normalized release model for the final homepage, download page, and
-  download selector.
+  download selector. Its detailed plan is now recorded in
+  `docs/implementation-plans/05-pages-and-interactivity.md`; the plan was
+  manually reviewed on 2026-08-04 after the configured review skill source was
+  unavailable.
 - Phases 6 and 8 remain planned after Phase 5. Phase 8 must remain after
   deployment because it extends the application release workflow only after
   the website has a live destination.
