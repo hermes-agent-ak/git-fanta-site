@@ -11,7 +11,6 @@ depends_on:
   - docs/implementation-plans/02-visual-experience-and-motion.md
   - docs/implementation-plans/03-content-and-product-assets.md
 deferred_numeric_phases:
-  - docs/implementation-plans/04-github-release-integration.md
   - docs/implementation-plans/05-pages-and-interactivity.md
   - docs/implementation-plans/06-testing-quality-and-security.md
 implementation_branch: feature/phase-7-github-pages-deployment
@@ -185,7 +184,8 @@ the first deployment needs approval for the `github-pages` environment.
 - Do not implement the Git Fanta application repository's dispatch sender. That
   belongs to Phase 8.
 - Do not read release information from `client_payload`. A dispatch payload is
-  only a trigger until Phase 4 provides independently fetched release data.
+  only a trigger; the completed Phase 4 loader independently fetches release
+  data during the website build.
 - Do not add a runtime server, API proxy, database, container, CDN, or hosting
   provider other than GitHub Pages.
 - Do not commit `dist/`, use a `gh-pages` source branch, or publish from the
@@ -220,10 +220,12 @@ the first deployment needs approval for the `github-pages` environment.
 
 ### Dependency decision
 
-Phase 7 deliberately depends on phases 0–3 only. Phases 4–6 are deferred
-because a static foundation page can already be built and deployed, and making
-deployment wait for release data or final page content would delay the first
-public milestone without improving the deployment boundary.
+Phase 7 deliberately depended on phases 0–3 during its promoted execution.
+Phases 4–6 were deferred at that point because a static foundation page could
+already be built and deployed, and making the first deployment wait for release
+data or final page content would have delayed the public milestone. Phase 4 has
+since extended the Pages build with live release-data validation; Phase 5 and
+Phase 6 remain deferred.
 
 ## Files to create
 
@@ -256,8 +258,8 @@ This phase adds no runtime application data model. Its explicit contracts are:
 | Build runtime          | Node 24 with the committed pnpm lockfile                 |
 
 The repository-dispatch payload is intentionally not part of the deployment
-contract. It is only an event trigger until Phase 4 provides independently
-fetched release data.
+contract. It remains only an event trigger; Phase 4 independently fetches and
+validates release data during the live Pages build.
 
 ## Implementation steps
 
@@ -469,7 +471,9 @@ or the application repository checkout.
 - Project-subpath navigation, local assets, semantic shell, logo, showcase,
   keyboard behavior, reduced motion, and accessibility checks work on the live
   artifact.
-- Deployment does not depend on SonarQube, release data, a cross-repository
-  secret, or a self-hosted runner.
+- Deployment does not depend on SonarQube, a cross-repository secret, or a
+  self-hosted runner. After Phase 4, the Pages build explicitly uses live
+  release data from GitHub and fails before deployment when that data cannot be
+  obtained or validated.
 - Previous phases remain unchanged except for documented deployment references.
 - This plan records the successful run and is marked complete.

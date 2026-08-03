@@ -790,8 +790,9 @@ or cross-repository release triggering are implemented. The numbered phases
 remain unchanged; this is an execution-order decision. Phase 7 depends only on
 the static Astro foundation and the current Phase 3 content/assets.
 
-Phase 7 is now complete and live. Phase 4 — release data — is the next planned
-implementation phase; phases 5, 6, and 8 remain behind it in the reviewed
+Phase 7 is complete and live. Phase 4 — release data — is now implemented and
+verified on `feature/phase-4-github-release-integration`; Phase 5 is the next
+planned implementation phase. Phases 6 and 8 remain behind it in the reviewed
 execution order.
 
 ### Phase 0 — Bootstrap
@@ -838,8 +839,8 @@ GitHub Pages configuration and deployment workflow are implemented and merged
 after Phase 3. The production run succeeded on `main`, project-subpath routing
 and static assets were verified, and the site is live at
 `https://hermes-agent-ak.github.io/git-fanta-site/`. The deployment remains
-independent from release data, final page composition, and cross-repository
-integration.
+independent from final page composition and cross-repository integration. Phase
+4 now extends its build step with independently fetched, validated release data.
 
 ### Phase 8 — Repository integration
 
@@ -862,9 +863,15 @@ Update the Git Fanta release workflow to dispatch a website rebuild after a rele
 - Phase 7 — GitHub Pages deployment: complete and live from `main`. The
   successful production run is recorded in the Phase 7 plan and the live URL
   is `https://hermes-agent-ak.github.io/git-fanta-site/`.
-- Phase 4 — release data: next implementation phase. It remains independent
-  from the already-working Pages deployment boundary.
-- Phases 5, 6, and 8 remain planned after Phase 4. Phase 8 must remain after
+- Phase 4 — release data: complete on
+  `feature/phase-4-github-release-integration` at commit `9400a92`. Native
+  GitHub fetching, Zod validation, normalized release data, asset
+  classification, fixture mode, the Handoff marker, and live/fixture workflow
+  contracts are implemented and verified.
+- Phase 5 — pages and interactivity: next implementation phase. It will consume
+  the normalized release model for the final homepage, download page, and
+  download selector.
+- Phases 6 and 8 remain planned after Phase 5. Phase 8 must remain after
   deployment because it extends the application release workflow only after
   the website has a live destination.
 
