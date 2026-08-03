@@ -27,10 +27,11 @@ later implementation phases.
   package manifest, frozen pnpm lockfile, Astro configuration, strict TypeScript
   configuration, Tailwind CSS 4 Vite integration, React integration, the base-path
   helper, global styles, CI, and baseline tests.
-- The current implementation branch feature/phase-1-design-system-and-layout is
-  based on feature/phase-0-project-bootstrap. The shared dev branch does not yet
-  contain the Phase 0 website outputs, so this branch must not be rebased onto dev
-  until Phase 0 is integrated. The eventual pull request target remains dev.
+- At plan creation, the implementation branch
+  feature/phase-1-design-system-and-layout was based on
+  feature/phase-0-project-bootstrap. At completion, the Phase 0 website outputs
+  are integrated into the shared branches and the pull request target remains
+  dev.
 - src/styles/global.css already contains preliminary raw color variables, a global
   reset, a focus-visible rule, a skip-link rule, and reduced-motion handling. Phase
   1 must evolve this stylesheet into the approved semantic token contract instead

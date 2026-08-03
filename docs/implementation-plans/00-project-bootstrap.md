@@ -3,7 +3,7 @@ status: completed
 completed_at: 2026-08-02
 implementation_branch: feature/phase-0-project-bootstrap
 implementation_head: committed
-ci_run: not yet run in GitHub Actions; verified locally
+ci_run: https://github.com/hermes-agent-ak/git-fanta-site/actions/runs/30849757188 (success)
 ---
 
 # Phase 0 Implementation Plan — Project Bootstrap
