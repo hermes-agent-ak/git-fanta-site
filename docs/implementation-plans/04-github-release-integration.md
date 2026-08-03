@@ -1,5 +1,5 @@
 ---
-status: ready
+status: complete
 phase: 4
 execution_order: next
 plan_reviewed_at: 2026-08-03
@@ -518,29 +518,29 @@ stop the build and leave the prior GitHub Pages deployment untouched.
 
 ## Acceptance criteria
 
-- [ ] `zod` is added to `package.json` and locked in `pnpm-lock.yaml`.
-- [ ] The raw GitHub response is validated with Zod before normalization.
-- [ ] The normalized model matches the documented `LatestRelease` and
+- [x] `zod` is added to `package.json` and locked in `pnpm-lock.yaml`.
+- [x] The raw GitHub response is validated with Zod before normalization.
+- [x] The normalized model matches the documented `LatestRelease` and
       `ReleaseAsset` contracts.
-- [ ] Native `fetch` sends the exact endpoint, Accept header, API-version header,
+- [x] Native `fetch` sends the exact endpoint, Accept header, API-version header,
       and optional build-only Bearer token.
-- [ ] Live mode is the default and fixture mode is explicit.
-- [ ] Live API, transport, JSON, schema, timeout, and invalid-mode failures stop
+- [x] Live mode is the default and fixture mode is explicit.
+- [x] Live API, transport, JSON, schema, timeout, and invalid-mode failures stop
       the build without stale fixture fallback.
-- [ ] All known asset kinds and the ambiguous Linux/Python `.tar.gz` cases are
+- [x] All known asset kinds and the ambiguous Linux/Python `.tar.gz` cases are
       classified correctly.
-- [ ] The current Handoff section consumes only the normalized release version;
+- [x] The current Handoff section consumes only the normalized release version;
       no final download UI is introduced.
-- [ ] CI uses fixture mode for deterministic build/E2E execution and the Pages
+- [x] CI uses fixture mode for deterministic build/E2E execution and the Pages
       workflow uses live mode.
-- [ ] The optional `GITHUB_TOKEN` never reaches `PUBLIC_` configuration,
+- [x] The optional `GITHUB_TOKEN` never reaches `PUBLIC_` configuration,
       browser output, generated assets, or logs.
-- [ ] Existing unit, lint, type, build, browser, accessibility, formatting,
+- [x] Existing unit, lint, type, build, browser, accessibility, formatting,
       and base-path checks remain green.
-- [ ] No `hermes-agent-ak/git-fanta` application-repository file or SonarQube
+- [x] No `hermes-agent-ak/git-fanta` application-repository file or SonarQube
       workflow changes.
-- [ ] README documents fixture mode, live build behavior, and failure semantics.
-- [ ] This plan records the implementation branch, verification, and completion
+- [x] README documents fixture mode, live build behavior, and failure semantics.
+- [x] This plan records the implementation branch, verification, and completion
       evidence before it is marked complete.
 
 ## Failure cases
@@ -619,3 +619,23 @@ stop the build and leave the prior GitHub Pages deployment untouched.
   failure behavior, and verification results.
 - This plan is marked complete only after all acceptance criteria and review gates
   pass.
+
+## Completion evidence
+
+Verified on 2026-08-03 from
+`feature/phase-4-github-release-integration`:
+
+- `pnpm format:check` passed.
+- `pnpm lint` passed.
+- `pnpm check` passed with zero errors, warnings, or hints.
+- `pnpm test:unit` passed: 10 files and 50 tests.
+- `GITHUB_API_MODE=fixture pnpm build` passed and generated the Handoff marker
+  `Latest release: 1.0.2`.
+- `GITHUB_API_MODE=fixture pnpm exec playwright test` passed: 15 tests,
+  including Axe, reduced-motion, mobile, project-subpath, and release-marker
+  coverage.
+- `GITHUB_API_MODE=live pnpm build` passed against the public GitHub latest
+  release endpoint and generated the same normalized release version.
+- `git diff --check` passed.
+- Generated output contains no `GITHUB_TOKEN`, `Authorization`, or raw GitHub
+  response field names.
