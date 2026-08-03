@@ -1,11 +1,26 @@
-const nav = document.querySelector<HTMLElement>("[data-branchline-nav]");
+type BranchlineRoot = Pick<Document, "getElementById" | "querySelector">;
+type BranchlineView = {
+  IntersectionObserver?:
+    | (new (
+        callback: IntersectionObserverCallback,
+        options?: IntersectionObserverInit,
+      ) => IntersectionObserver)
+    | undefined;
+};
 
-if (nav) {
+export function initializeBranchlineEnhancement(
+  root: BranchlineRoot,
+  view: BranchlineView,
+): void {
+  const nav = root.querySelector<HTMLElement>("[data-branchline-nav]");
+
+  if (!nav) return;
+
   const links = Array.from(
     nav.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'),
   );
   const sections = links
-    .map((link) => document.getElementById(link.hash.slice(1)))
+    .map((link) => root.getElementById(link.hash.slice(1)))
     .filter((section): section is HTMLElement => section !== null);
   const sectionIds = new Set(sections.map((section) => section.id));
 
@@ -31,8 +46,8 @@ if (nav) {
     });
   });
 
-  if ("IntersectionObserver" in window) {
-    const observer = new IntersectionObserver(
+  if (view.IntersectionObserver) {
+    const observer = new view.IntersectionObserver(
       (entries) => {
         const visible = entries
           .filter((entry) => entry.isIntersecting)
@@ -47,4 +62,13 @@ if (nav) {
 
     sections.forEach((section) => observer.observe(section));
   }
+}
+
+if (typeof document !== "undefined") {
+  initializeBranchlineEnhancement(document, {
+    IntersectionObserver:
+      typeof IntersectionObserver === "undefined"
+        ? undefined
+        : IntersectionObserver,
+  });
 }

@@ -7,6 +7,7 @@ import Card from "../components/ui/Card.astro";
 import Container from "../components/ui/Container.astro";
 import BranchlineNav from "../components/visual/BranchlineNav.astro";
 import GitTreeReveal from "../components/visual/GitTreeReveal.astro";
+import { product } from "../content/product";
 import { experienceSections } from "../lib/experience-sections";
 import { siteHref } from "../lib/site-url";
 
@@ -52,8 +53,8 @@ const experienceCopy = {
 ---
 
 <BaseLayout
-  title="Git Fanta"
-  description="The Git Fanta website foundation."
+  title={product.name}
+  description={product.summary}
   mainClass="site-main"
 >
   <SiteHeader slot="header" baseUrl={baseUrl} />
@@ -65,7 +66,7 @@ const experienceCopy = {
         <h1
           class="max-w-4xl text-display font-extrabold leading-none tracking-tight text-fg-primary"
         >
-          Git Fanta
+          {product.name}
         </h1>
         <p class="mt-6 max-w-2xl text-lg leading-8 text-fg-muted sm:text-xl">
           A branchable interface foundation: semantic HTML first, with a

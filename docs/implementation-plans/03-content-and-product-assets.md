@@ -1,6 +1,9 @@
 ---
-status: planned
+status: complete
 phase: 3
+plan_reviewed_at: 2026-08-03
+plan_review_status: complete
+completed_at: 2026-08-03
 depends_on:
   - docs/implementation-plans/01-design-system-and-layout.md
   - docs/implementation-plans/02-visual-experience-and-motion.md
@@ -17,19 +20,50 @@ target_branch: dev
 Create a verified content and asset foundation for the Git Fanta website. The
 website must use product facts from hermes-agent-ak/git-fanta, preserve the
 provenance and licensing of copied assets, and provide reusable content for the
-later page and release-integration phases.
+later page and release-integration phases. The project-owner supplied logo is
+the authoritative website brand asset for this phase.
 
 This phase deliberately establishes the content contract before the final
 homepage and download page are built. It will copy the authentic Git Fanta logo
-when its provenance is confirmed, evaluate the screenshot supplied by the
-project owner, and expose an explicit pending state rather than presenting an
-invented image or unsupported product claim.
+after the project owner's direct publication instruction, evaluate the supplied
+media, and expose an explicit pending state for any asset that is not approved
+for direct publication rather than presenting an unsupported product claim.
 
-## Current-state findings
+## Implemented result
 
-- Phase 0 is implemented on the current website branch. The site currently has
-  src/pages/index.astro, src/styles/global.css, src/lib/site-url.ts, unit
-  tests, an E2E smoke test, and no src/content/ or public/ asset tree.
+- `src/content/product.ts` exposes four approved claims whose wording and
+  provenance point to the Git Fanta application repository.
+- `src/content/assets.ts` validates the project-owner supplied vectorized SVG
+  logo derived from the PNG, one pending screenshot candidate, and one ready
+  derived showcase with both supplied input paths and a recorded
+  transformation.
+- `public/brand/git-fanta-logo.svg` is the supplied vectorized logo and is
+  integrated into the base-path-safe header with decorative alt text and
+  visible product naming. It remains compact on mobile and grows to a 56px
+  square at desktop widths. The older application SVG is not copied into the
+  public brand surface.
+- `public/product/git-fanta-showcase.webp` is a 125,982-byte WebP derived from
+  the supplied screenshot and logo. The original inputs remain unchanged, and
+  the output is explicitly not presented as an independently verified product
+  screenshot.
+- `docs/content/asset-licenses.md` documents the selected logo's owner
+  permission, website-code licensing, the non-selected application SVG
+  reference, the composite transformation, and the pending-candidate boundary.
+- `scripts/prepare-phase3-media.mjs` provides the deterministic local PNG to
+  WebP conversion step for the generated composite and redacts the supplied
+  screenshot's machine-specific title-bar path before publication.
+- The implementation passes 27 unit tests, 14 browser tests, 3 Axe tests,
+  formatting, lint, Astro type checking, build, asset byte comparison, and
+  diff validation.
+
+## Pre-implementation findings
+
+- At review time, the Phase 2 visual experience was implemented on the
+  predecessor branch and this Phase 3 branch was based on that reviewed tip.
+  The site then had
+  src/pages/index.astro, src/styles/global.css, src/lib/site-url.ts, the
+  Branchline visual components, unit tests, E2E coverage, and no src/content/
+  or public/ asset tree.
 - Phase 1 is specified in
   docs/implementation-plans/01-design-system-and-layout.md. Its layout and
   site-header outputs are prerequisites for the small shell integration in this
@@ -46,11 +80,11 @@ invented image or unsupported product claim.
   Fanta as a Git GUI, describes it as a fork of git-cola, and states that it
   inherits the GPL-2.0 licence. The DAG documentation describes the Git
   history visualizer and its documented operations.
-- The application repository contains authentic logo files at
+- The application repository contains older logo files at
   fanta/icons/git-fanta.svg, fanta/icons/dark/git-fanta.svg, and
-  fanta/icons/git-fanta.ico. The SVG logo is the preferred website source
-  because it is resolution-independent and does not require a browser-specific
-  icon format.
+  fanta/icons/git-fanta.ico. These files remain application-source evidence
+  only; the project owner explicitly selected the supplied PNG for the website,
+  so they are not copied into the public brand surface.
 - fanta/icons/README.md and fanta/icons/dark/README.md document mixed
   third-party provenance. In particular, the Git logo is attributed to Jason
   Long and licensed under CC BY 3.0; the icon directories also contain assets
@@ -63,15 +97,28 @@ invented image or unsupported product claim.
   repository. It is a Phase 3 screenshot candidate, not an unknown stray
   artifact. Its product relevance, alternative text, intended destination, and
   publication permission must still be recorded before it is shipped.
-- The project owner has also supplied media/git-fanta-logo.png. It is a logo
-  candidate with no provenance or publication licence established by the file
-  alone. It must remain pending unless the project owner confirms permission
-  and the asset record documents its intended use, attribution, and any
-  transformation. It must not silently replace the source-backed application
-  SVG.
+- The project owner has also supplied media/git-fanta-logo.png. The direct
+  instruction to use it as the website logo establishes publication permission
+  for this project; the asset ledger records that provenance is project-owner
+  supplied rather than application-repository sourced.
 - The application repository has unrelated uncommitted user changes. Phase 3
   operates only in the website repository and must not modify the application
   repository.
+- The pre-implementation source evidence gate was rechecked on 2026-08-03:
+  all seven required source paths exist, the two Git Fanta SVG variants have
+  the same SHA-256 checksum, and the bounded application asset inventory found
+  no raster screenshot to reuse. The source checkout path remains runtime-only
+  and is not recorded in this plan.
+- The supplied `media/git-fanta-logo.png` is present as a 1024×1024 logo and
+  `media/screenshot.webp` is present as a screenshot candidate. The logo is
+  selected for direct website use by the project owner's instruction; the
+  screenshot remains a pending direct-publication candidate.
+- The project owner has now explicitly requested a derived showcase medium
+  assembled from the supplied logo and screenshot. This grants publication
+  permission for that composite, but does not turn the source screenshot into
+  a verified product screenshot. The original inputs remain unchanged and the
+  composite must be labelled as derived project media, with its two inputs and
+  transformation recorded in the asset manifest and licence ledger.
 - GitHub Release data, release asset classification, download metadata, and
   API fetching are Phase 4 responsibilities. Phase 3 must not duplicate those
   responsibilities in a local content file.
@@ -106,23 +153,25 @@ text decision, licence, attribution, and status.
 
 The manifest must contain:
 
-- one ready logo record for the selected authentic SVG source;
+- one ready logo record for the project-owner supplied vectorized SVG derived
+  from the supplied PNG;
 - one screenshot record for the supplied media/screenshot.webp candidate. It
   remains pending with no destination file until its authenticity, alternative
   text, intended use, and publication permission are documented; and
-- one pending logo-candidate record for media/git-fanta-logo.png. It remains
-  outside public/brand until its provenance and publication permission are
-  confirmed; and
-- no release assets, download URLs, generated previews, or copied upstream
-  screenshots.
+- one ready derived showcase record built from the two project-owner supplied
+  media inputs. It is not presented as an authentic product screenshot and is
+  published only under a distinct showcase destination; and
+- no release assets, download URLs, unapproved generated previews, or copied
+  upstream screenshots.
 
 ### 3. Copy the required logo only
 
-Compare the light and dark Git Fanta SVG sources before choosing the website
-source. Copy only the selected file to public/brand/git-fanta.svg and verify
-that the destination is byte-identical to the selected source. Do not copy the
-ICO, the full icon set, or duplicate light/dark files unless a later plan proves
-that a separate destination is required.
+Copy the vectorized SVG supplied at the project-owner URL to
+`public/brand/git-fanta-logo.svg` and verify that the destination is
+byte-identical to the downloaded source. Record `media/git-fanta-logo.png` as
+the supplied input and keep the application repository's older SVG out of the
+public brand surface. Do not copy the ICO, full icon set, or duplicate logo
+variants.
 
 ### 4. Preserve attribution and licence boundaries
 
@@ -162,9 +211,10 @@ the internal shape of an implementation merely because it exists.
 - Do not build the final homepage, download page, 404 page, SEO metadata,
   structured data, or the React download island. Those belong to
   docs/implementation-plans/05-pages-and-interactivity.md.
-- Do not create a screenshot, screenshot-like SVG, mockup, synthetic marketing
-  image, or upstream git-cola image when an authentic Git Fanta screenshot is
-  unavailable.
+- Do not create a fabricated product screenshot, screenshot-like SVG, mockup,
+  synthetic marketing image, or upstream git-cola image. The explicitly
+  requested derived showcase is the sole exception: it must use the supplied
+  inputs, be labelled as derived project media, and make no authenticity claim.
 - Do not invent statistics, testimonials, user counts, feature guarantees,
   compatibility claims, security claims, performance claims, or release claims.
 - Do not copy the complete application icon directory or mix its licences into a
@@ -209,6 +259,16 @@ application checkout:
 If a source path, claim, or licence statement has changed, stop at the evidence
 gate and update the content decision before proceeding.
 
+### Review decision
+
+The plan is ready for implementation on
+`feature/phase-3-content-and-product-assets`. The review found no missing
+Phase 1/2 dependency or duplicate content/asset abstraction. The first
+implementation slice is consequently limited to the source-backed content
+contract, typed asset manifest, licence ledger, SVG shell integration, and the
+explicitly requested derived showcase; the two supplied media candidates remain
+behind their direct-publication evidence gates.
+
 ## Files to create
 
 - src/content/product.ts — approved product content, source metadata, and pure
@@ -221,11 +281,16 @@ gate and update the content decision before proceeding.
   and pending-state regression tests.
 - tests/e2e/content-assets.spec.ts — browser-level logo loading and
   accessibility regression coverage.
-- public/brand/git-fanta.svg — the selected authentic Git Fanta logo only.
+- public/brand/git-fanta-logo.svg — the selected project-owner supplied
+  vectorized logo only.
 - docs/content/asset-licenses.md — asset provenance, attribution, and licence
   boundaries for every copied site asset.
 - public/product/git-fanta.webp — create only if the supplied screenshot passes
   the screenshot evidence gate; otherwise keep the candidate pending.
+- public/product/git-fanta-showcase.webp — derived, optimized showcase media
+  composed from the supplied logo and screenshot without changing either input.
+- scripts/prepare-phase3-media.mjs — deterministic local WebP conversion for
+  the generated composite output.
 
 The following master-plan artifacts are referenced as future boundaries but are
 not created or modified by Phase 3:
@@ -236,14 +301,17 @@ not created or modified by Phase 3:
 ## Files to modify
 
 - src/components/site/SiteHeader.astro — consume the approved product name
-  and selected logo through the Phase 3 content and asset modules. Modify only
-  after the Phase 1 component exists.
+  and selected logo through the Phase 3 content and asset modules, with
+  responsive logo sizing that stays compact on mobile and larger on desktop.
+  Modify only after the Phase 1 component exists.
 - src/pages/index.astro — pass the approved product identity to the shell if
   the Phase 1 implementation currently contains bootstrap-only identity text.
   Do not add final page sections.
 - src/styles/global.css — modify only if the authentic logo needs a narrowly
   scoped size or alignment rule that cannot be expressed by the Phase 1 token
   contract.
+- eslint.config.mjs — ignore generated coverage reports so local lint remains
+  clean after the SonarQube coverage command.
 - docs/implementation-plans/03-content-and-product-assets.md — update the
   frontmatter and completion notes after implementation and verification.
 
@@ -282,26 +350,35 @@ status. It must not silently approve a claim with incomplete provenance.
 src/content/assets.ts must expose a readonly asset manifest and a validator.
 Each record has:
 
-| Field            | Required value or rule                                                           |
-| ---------------- | -------------------------------------------------------------------------------- |
-| id               | Stable identifier such as brand-logo or product-screenshot                       |
-| kind             | logo or screenshot in this phase                                                 |
-| sourceRepository | Source repository; use hermes-agent-ak/git-fanta-site for supplied candidates |
+| Field            | Required value or rule                                                                       |
+| ---------------- | -------------------------------------------------------------------------------------------- |
+| id               | Stable identifier such as brand-logo or product-screenshot                                   |
+| kind             | logo or screenshot in this phase                                                             |
+| sourceRepository | Source repository; use hermes-agent-ak/git-fanta-site for supplied candidates                |
 | sourcePath       | media/screenshot.webp or media/git-fanta-logo.png for supplied candidates, or null if absent |
-| targetPath       | Static output path, or null while pending                                        |
-| status           | ready or pending                                                                 |
-| altText          | Explicit text or an explicit decorative-image decision                           |
-| license          | Original licence expression, never an unexplained default                        |
-| attribution      | Author/copyright and provenance statement                                        |
-| sourceUrl        | Public source URL when documented; never a credential-bearing URL                |
+| targetPath       | Static output path, or null while pending                                                    |
+| status           | ready or pending                                                                             |
+| altText          | Explicit text or an explicit decorative-image decision                                       |
+| license          | Original licence expression, never an unexplained default                                    |
+| attribution      | Author/copyright and provenance statement                                                    |
+| sourceUrl        | Public source URL when documented; never a credential-bearing URL                            |
+| derivedFrom      | Repository-relative input paths for a derived asset, otherwise an empty list                 |
+| transformation   | Recorded preparation/compositing operation, or null for an unmodified asset                  |
+
+Derived records additionally carry `derivedFrom`, a non-empty list of
+repository-relative input paths, and a transformation note. A derived record
+must not be described as an unmodified or independently verified product
+screenshot when the source evidence does not support that claim.
 
 The validator must reject a ready asset with a missing licence, attribution, or
 source path. It must require a logo destination under public/brand and a ready
 screenshot destination under public/product. It must reject a pending screenshot
 that has a destination file. A pending screenshot record may reference the
 supplied candidate, but it is metadata and not a published image until the
-evidence gate passes. The supplied PNG logo candidate follows the same rule and
-must not replace the selected source-backed SVG without a documented decision.
+evidence gate passes. The selected vectorized SVG is ready because the project
+owner explicitly requested its publication; its ledger entry must identify the
+supplied PNG input and must not imply that it was sourced from the application
+repository.
 
 ### Accessibility contract for the logo
 
@@ -323,8 +400,9 @@ itself remains the accessible name and must point to the base-path-safe home URL
 4. Set GIT_FANTA_SOURCE_ROOT for the local source checkout and verify each
    source evidence gate. Do not place the resolved path in source, tests, plans,
    build output, or logs.
-5. Compare the two SVG logo sources by checksum and textual content. Select one
-   source only when the comparison and its README attribution are understood.
+5. Confirm the project-owner supplied vectorized SVG URL and its relationship
+   to the supplied PNG. Keep the application SVG comparison as evidence only;
+   do not copy the application SVG into the website brand surface.
 
 ### Step 1 — Add the source-backed product contract using TDD
 
@@ -359,23 +437,22 @@ itself remains the accessible name and must point to the base-path-safe home URL
 5. Run pnpm test:unit -- tests/unit/product-assets.test.ts and then the full
    unit suite. Keep the validator dependency-free and deterministic.
 
-### Step 3 — Copy and document the authentic logo
+### Step 3 — Copy and document the selected vector logo
 
-1. Create public/brand and copy only the selected SVG from the bounded source
-   path. Refuse to overwrite an existing destination without first comparing it.
-2. Verify the destination is byte-identical to the selected source and that it
-   is a valid SVG asset.
-3. Write docs/content/asset-licenses.md from the application icon README. The
-   logo entry must include Jason Long, the CC BY 3.0 licence, the Git logo
-   source URL https://git-scm.com/downloads/logos, the CC BY 3.0 URL
-   https://creativecommons.org/licenses/by/3.0/, the application source path,
-   the selected website destination, and the fact that no visual transformation
-   was applied.
-4. Record the website code licence separately from the logo's original licence.
-   Do not describe the logo as MIT or GPL-2.0 unless the source evidence
-   explicitly supports that exact statement.
-5. Do not copy any other icon until its individual source and licence have been
-   reviewed and added to the ledger.
+1. Create public/brand and copy only the downloaded vectorized SVG supplied at
+   the project-owner URL. Refuse to overwrite an existing destination without
+   first comparing it.
+2. Verify the destination is byte-identical to the downloaded source and that
+   it is a valid standalone SVG without scripts or external image references.
+3. Record media/git-fanta-logo.png as the supplied input and write
+   docs/content/asset-licenses.md with the vector source URL, direct
+   publication permission, selected destination, and no unsupported
+   third-party licence claim.
+4. Record the website code licence separately from the supplied logo's
+   publication permission. Do not label the supplied vector or PNG as MIT,
+   GPL-2.0, or CC BY 3.0 without source evidence for that exact file.
+5. Do not copy the application SVG, ICO, or any other icon into the public
+   brand surface.
 
 ### Step 4 — Integrate the logo into the Phase 1 shell
 
@@ -387,7 +464,8 @@ itself remains the accessible name and must point to the base-path-safe home URL
    logo record, preserve the visible product text, use alt="", and keep the
    home URL base-path-safe.
 3. Assert that the rendered image has one matching logo, an empty alt attribute,
-   a base-path-compatible URL ending in git-fanta.svg, and a successful load.
+   a base-path-compatible URL ending in git-fanta-logo.svg, and a successful
+   load.
 4. Run the focused browser test at the configured Chromium target. Do not add a
    browser test that depends on the local application checkout at runtime.
 
@@ -405,6 +483,26 @@ itself remains the accessible name and must point to the base-path-safe home URL
    stop and record its source, permission or licence, crop/resize operation,
    alternative text, and destination before adding it. Do not silently change
    the pending record to ready.
+
+### Step 5a — Compose the requested showcase medium
+
+1. Use the project-owner supplied `media/screenshot.webp` as the edit target
+   and `media/git-fanta-logo.png` as the supporting compositing input. Preserve
+   the screenshot's visible interface and do not invent product controls,
+   claims, statistics, or release information.
+2. Produce `public/product/git-fanta-showcase.webp` as a bounded, responsive
+   WebP suitable for later page integration. The composition may frame the
+   screenshot and place the supplied logo in reserved negative space, but it
+   must not overwrite either source file.
+3. Record both inputs, the transformation, publication permission, alternative
+   text, and the fact that the result is derived project media in
+   `src/content/assets.ts` and `docs/content/asset-licenses.md`.
+4. Keep `product-screenshot` pending unless the screenshot itself is later
+   verified as an authentic Git Fanta application capture. The composite is a
+   ready showcase asset, not evidence that the input screenshot is authentic.
+5. Inspect the output for legible logo edges, no accidental generated text or
+   watermark, no absolute local paths, a valid WebP signature, and a reasonable
+   file size before adding it to the static output.
 
 ### Step 6 — Complete the review gate
 
@@ -451,13 +549,14 @@ visual/source difference; that is a review signal, not permission to copy both.
 
     set -eo pipefail
     mkdir -p public/brand
-    test ! -e public/brand/git-fanta.svg
-    install -m 0644 "$GIT_FANTA_SOURCE_ROOT/fanta/icons/git-fanta.svg" public/brand/git-fanta.svg
-    cmp "$GIT_FANTA_SOURCE_ROOT/fanta/icons/git-fanta.svg" public/brand/git-fanta.svg
+    VECTOR_LOGO_SOURCE=/tmp/git-fanta-logo-external.svg
+    test -s "$VECTOR_LOGO_SOURCE"
+    test ! -e public/brand/git-fanta-logo.svg
+    install -m 0644 "$VECTOR_LOGO_SOURCE" public/brand/git-fanta-logo.svg
+    cmp "$VECTOR_LOGO_SOURCE" public/brand/git-fanta-logo.svg
 
-Replace the source path in the final command only if the documented comparison
-selects the dark source instead. The destination remains exactly
-public/brand/git-fanta.svg.
+The destination remains exactly public/brand/git-fanta-logo.svg. The
+application-repository SVG is evidence only and is not copied.
 
 ### Focused and full verification
 
@@ -510,10 +609,13 @@ inspection is required.
 ### Manual content and licence review
 
 - Read each rendered product sentence alongside its application source section.
-- Confirm the logo attribution and original CC BY 3.0 URL are present in the
-  licence ledger.
+- Confirm the application SVG's CC BY 3.0 attribution remains documented only
+  for the non-selected application reference; do not assign it to the supplied
+  project-owner logo.
 - Confirm the supplied screenshot is either documented as ready with its
   provenance and permission or remains explicitly pending.
+- Confirm the derived showcase records both supplied inputs and does not imply
+  that the source screenshot is an independently verified product capture.
 - Inspect the production output for absolute local paths, source-checkout files,
   credentials, and root-relative URLs that would break GitHub Pages project
   paths.
@@ -534,15 +636,16 @@ inspection is required.
 - src/content/product.ts contains only source-backed, reviewable product copy.
 - Every approved claim identifies hermes-agent-ak/git-fanta, a repository-relative
   source path, and a source section.
-- src/content/assets.ts contains exactly one ready source-backed logo record,
-  one screenshot record for media/screenshot.webp, and one pending logo-candidate
-  record for media/git-fanta-logo.png. Candidate records are pending unless
-  their evidence gates pass and the decision is documented.
-- public/brand/git-fanta.svg is the selected authentic logo and is byte-identical
-  to its documented application source.
-- No screenshot, mockup, upstream image, release data, or download metadata was
-  invented or copied into the site. The supplied screenshot is copied only if
-  its evidence gate passes.
+- src/content/assets.ts contains exactly one ready project-owner supplied
+  vectorized logo record derived from media/git-fanta-logo.png and one pending
+  screenshot record. It also contains one ready derived showcase record with
+  both supplied input paths and a transformation note.
+- public/brand/git-fanta-logo.svg is byte-identical to the downloaded
+  project-owner provided vector source.
+- No fabricated product screenshot, mockup, upstream image, release data, or
+  download metadata was invented or copied into the site. The supplied
+  screenshot remains pending as a direct product asset; only the explicitly
+  requested derived showcase is published.
 - docs/content/asset-licenses.md documents every copied asset and separates
   website-code licensing from asset licensing.
 - The Phase 1 header renders the logo with the documented accessible semantics
@@ -563,12 +666,14 @@ inspection is required.
   source-backed wording.
 - **Ambiguous asset provenance or licence:** do not copy the asset. Keep it
   pending and record the missing evidence in the licence ledger.
-- **Light/dark logo mismatch:** inspect both SVGs and their documentation before
-  selecting one. Do not silently publish duplicate variants.
+- **Logo provenance ambiguity:** keep the supplied logo publication permission
+  and attribution explicit; do not substitute the application SVG or make an
+  unsupported licence claim.
 - **Existing destination file:** stop the copy command, compare the file, and
   resolve the difference in a reviewable change. Never overwrite it blindly.
 - **Supplied screenshot fails the evidence gate:** retain the candidate as
-  pending and do not create a screenshot substitute.
+  pending and do not promote the derived showcase into an authentic product
+  screenshot or use it to replace the evidence decision.
 - **Missing Phase 1 header contract:** stop shell integration and wait for the
   dependency rather than adding a parallel header implementation.
 - **Base-path failure:** fix the existing URL/asset integration contract before
@@ -600,9 +705,9 @@ inspection is required.
 
 - Keep all Phase 3 work on feature/phase-3-content-and-product-assets until
   review is complete.
-- If the logo's provenance is rejected, remove only the exact
-  public/brand/git-fanta.svg file in a follow-up commit and keep the manifest
-  record pending. Do not remove unrelated assets or reset the branch.
+- If the supplied logo's publication permission is withdrawn, remove only the
+  exact public/brand/git-fanta-logo.svg file in a follow-up commit and keep the
+  manifest record pending. Do not remove unrelated assets or reset the branch.
 - If the supplied screenshot is rejected after copying, remove only the exact
   public/product/git-fanta.webp file in a follow-up commit and return its
   manifest record to pending. Preserve media/screenshot.webp unchanged.
@@ -620,11 +725,15 @@ inspection is required.
   and has a reviewable pull request containing only Phase 3 changes.
 - Product copy is source-backed, typed, validated, and free of unsupported
   claims.
-- The authentic logo is copied once, loads through the GitHub Pages base path,
-  and has complete attribution and licence documentation.
+- The project-owner supplied logo is copied once, loads through the GitHub Pages
+  base path, and has complete publication-permission documentation.
 - The supplied screenshot is either published with documented provenance,
-  permission, and accessibility metadata, or remains explicitly pending; no
-  synthetic image exists.
+  permission, and accessibility metadata, or remains explicitly pending. No
+  fabricated product screenshot exists; the derived showcase is separately
+  documented as project media.
+- The requested derived showcase medium is published with both input paths,
+  transformation metadata, owner permission, and an explicit non-authenticity
+  boundary where applicable.
 - The Phase 1 shell consumes the verified content and asset contract without
   adding client-side JavaScript or final page features.
 - Focused unit, browser, accessibility, formatting, lint, type-check, build,
