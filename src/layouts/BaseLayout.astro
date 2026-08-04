@@ -1,14 +1,30 @@
 ---
 import "../styles/global.css";
 import SkipLink from "../components/ui/SkipLink.astro";
+import { createPageMetadata, type PageMetadata } from "../lib/metadata";
+import { siteHref } from "../lib/site-url";
 
 interface Props {
   title: string;
   description: string;
   mainClass?: string;
+  metadata?: PageMetadata;
 }
 
-const { title, description, mainClass } = Astro.props;
+const { title, description, mainClass, metadata } = Astro.props;
+const pageMetadata =
+  metadata ??
+  createPageMetadata({
+    title,
+    description,
+    canonicalPath: "/",
+    baseUrl: import.meta.env.BASE_URL,
+    site: Astro.site,
+    includeSoftwareApplication: true,
+  });
+const structuredData = pageMetadata.softwareApplication
+  ? JSON.stringify(pageMetadata.softwareApplication).replaceAll("<", "\\u003c")
+  : null;
 ---
 
 <!doctype html>
@@ -17,7 +33,31 @@ const { title, description, mainClass } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
+    <link rel="canonical" href={pageMetadata.canonicalUrl} />
+    <link
+      rel="icon"
+      href={siteHref("/favicon.svg", import.meta.env.BASE_URL)}
+    />
+    <meta property="og:title" content={pageMetadata.title} />
+    <meta property="og:description" content={pageMetadata.description} />
+    <meta property="og:type" content={pageMetadata.ogType} />
+    <meta property="og:url" content={pageMetadata.canonicalUrl} />
+    <meta property="og:image" content={pageMetadata.socialImageUrl} />
+    <meta property="og:image:alt" content={pageMetadata.socialImageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageMetadata.title} />
+    <meta name="twitter:description" content={pageMetadata.description} />
+    <meta name="twitter:image" content={pageMetadata.socialImageUrl} />
     <title>{title}</title>
+    {
+      structuredData && (
+        <script
+          type="application/ld+json"
+          is:inline
+          set:html={structuredData}
+        />
+      )
+    }
   </head>
   <body>
     <SkipLink />

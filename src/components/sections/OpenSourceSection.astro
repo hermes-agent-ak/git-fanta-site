@@ -1,0 +1,42 @@
+---
+import type { ProductContent } from "../../content/product";
+
+interface Props {
+  product: ProductContent;
+}
+
+const { product } = Astro.props;
+const relationshipClaim = product.claims.find(
+  (claim) => claim.id === "relationship",
+);
+---
+
+<section
+  id="open-source"
+  class="page-section page-section--open-source"
+  aria-labelledby="open-source-heading"
+  data-experience-section
+>
+  <div class="section-heading-row">
+    <div>
+      <p class="eyebrow">Open source / project lineage</p>
+      <h2 id="open-source-heading">Open by design, open source by heritage</h2>
+    </div>
+    <span class="section-ref">refs/heads/main</span>
+  </div>
+  <div class="open-source-grid">
+    <p>
+      {
+        relationshipClaim?.text ??
+          "Git Fanta is an open-source Git GUI project."
+      }
+    </p>
+    <div class="open-source-links" aria-label="Git Fanta project links">
+      <a href="https://github.com/hermes-agent-ak/git-fanta">Repository</a>
+      <a href="https://github.com/hermes-agent-ak/git-fanta/issues">Issues</a>
+      <a href="https://github.com/hermes-agent-ak/git-fanta/blob/main/LICENSE"
+        >License</a
+      >
+    </div>
+  </div>
+</section>

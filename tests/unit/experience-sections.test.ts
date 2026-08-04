@@ -40,12 +40,12 @@ describe("experience section model", () => {
   });
 
   it("falls back to the first section when an active id is invalid", () => {
-    expect(resolveExperienceSectionId(experienceSections, "motion")).toBe(
-      "motion",
+    expect(resolveExperienceSectionId(experienceSections, "workflow")).toBe(
+      "workflow",
     );
     expect(
       resolveExperienceSectionId(experienceSections, "not-a-section"),
-    ).toBe("foundation");
+    ).toBe("hero");
   });
 
   it("declares bounded motion intents with reduced-motion fallbacks", () => {

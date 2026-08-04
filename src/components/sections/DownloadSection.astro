@@ -1,0 +1,44 @@
+---
+import type { LatestRelease } from "../../lib/releases/types";
+import { buildDownloadPageModel } from "../../lib/downloads";
+import { siteHref } from "../../lib/site-url";
+import Button from "../ui/Button.astro";
+
+interface Props {
+  latestRelease: LatestRelease;
+  baseUrl?: string;
+}
+
+const { latestRelease, baseUrl = import.meta.env.BASE_URL } = Astro.props;
+const model = buildDownloadPageModel(latestRelease);
+const availableCount = model.assets.filter(
+  (asset) => asset.availability === "available",
+).length;
+---
+
+<section
+  id="download"
+  class="page-section page-section--download"
+  aria-labelledby="download-heading"
+  data-experience-section
+>
+  <div class="section-heading-row">
+    <div>
+      <p class="eyebrow">Release / {latestRelease.version}</p>
+      <h2 id="download-heading">Pick the release that fits your setup</h2>
+    </div>
+    <span class="section-ref">refs/heads/release/next</span>
+  </div>
+  <div class="download-handoff">
+    <div>
+      <p class="download-handoff__version">Git Fanta {latestRelease.version}</p>
+      <p>
+        {availableCount} published artifacts are ready to inspect. Every build links
+        back to the complete GitHub Release and its checksums when present.
+      </p>
+    </div>
+    <Button href={siteHref("/download/", baseUrl)} size="lg">
+      View download options
+    </Button>
+  </div>
+</section>

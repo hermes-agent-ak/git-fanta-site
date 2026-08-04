@@ -1,5 +1,5 @@
 ---
-status: ready
+status: in_progress
 phase: 5
 execution_order: next
 plan_created_at: 2026-08-04
@@ -20,6 +20,7 @@ source_repository: hermes-agent-ak/git-fanta
 implementation_branch: feature/phase-5-pages-and-interactivity
 base_branch: feature/phase-4-github-release-integration
 target_branch: dev
+implementation_started_at: 2026-08-04
 ui_quality_bar: award-level discreet AI-assisted design showroom
 accessibility_target: WCAG 2.2 AA with EN 301 549-informed EU-oriented implementation
 ---
@@ -480,24 +481,19 @@ interface DownloadPageModel {
   title: string;
   publishedAt: string;
   releaseUrl: string;
+  completeReleaseUrl: string;
   checksum: DownloadAssetView | null;
-  assets: DownloadAssetView[];
+  assets: readonly DownloadAssetView[];
 }
 
 interface PageMetadata {
   title: string;
   description: string;
-  canonicalPath: string;
+  canonicalUrl: string;
   ogType: "website";
-  socialImagePath: string;
+  socialImageUrl: string;
   socialImageAlt: string;
-  softwareApplication?: {
-    name: string;
-    description: string;
-    url: string;
-    codeRepository: string;
-    license: string;
-  };
+  softwareApplication: Record<string, string> | null;
 }
 ```
 
@@ -636,6 +632,28 @@ Phase 6 work.
 - Verify internal URLs under `/git-fanta-site/` and root base configuration.
 - Parse JSON-LD; verify HTTPS external targets and `noopener noreferrer` for
   new tabs.
+
+## Implementation progress
+
+The implementation is in progress on
+`feature/phase-5-pages-and-interactivity`. The following scope is now present
+in the working tree and remains reviewable before commit:
+
+- page-experience contract, final homepage section models, source-backed feature
+  content, and the serializable release/download view model;
+- base-path-safe metadata, favicon, social preview, sitemap, robots endpoint,
+  homepage, download page, accessible 404 page, static Astro sections, and the
+  single hydrated Download Selector island;
+- responsive/reduced-motion/forced-colors styles, explicit missing and
+  unsupported asset states, no-JavaScript release-link fallback, and updated
+  unit and Playwright coverage.
+
+Completed verification so far: `pnpm check`, `pnpm test:unit`, fixture build,
+the dedicated pages/downloads/metadata E2E suites, the full fixture E2E suite,
+`pnpm test:a11y`, `pnpm format:check`, targeted documentation formatting,
+`pnpm lint`, `git diff --check`, root and deployment base-path builds, live
+build, and generated-output inspection. Manual visual review and the final
+staged commit review remain before this plan can be marked complete.
 
 ## Acceptance criteria
 

@@ -820,10 +820,10 @@ or cross-repository release triggering are implemented. The numbered phases
 remain unchanged; this is an execution-order decision. Phase 7 depends only on
 the static Astro foundation and the current Phase 3 content/assets.
 
-Phase 7 is complete and live. Phase 4 — release data — is now implemented and
-verified on `feature/phase-4-github-release-integration`; Phase 5 is the next
-planned implementation phase. Phases 6 and 8 remain behind it in the reviewed
-execution order.
+Phase 7 is complete and live. Phase 4 — release data — is implemented and
+verified on `feature/phase-4-github-release-integration`; Phase 5 is now in
+implementation on `feature/phase-5-pages-and-interactivity`. Phases 6 and 8
+remain behind it in the reviewed execution order.
 
 ### Phase 0 — Bootstrap
 
@@ -898,12 +898,15 @@ Update the Git Fanta release workflow to dispatch a website rebuild after a rele
   GitHub fetching, Zod validation, normalized release data, asset
   classification, fixture mode, the Handoff marker, and live/fixture workflow
   contracts are implemented and verified.
-- Phase 5 — pages and interactivity: next implementation phase. It will consume
-  the normalized release model for the final homepage, download page, and
-  download selector. Its detailed plan is now recorded in
+- Phase 5 — pages and interactivity: in implementation on
+  `feature/phase-5-pages-and-interactivity`. It consumes the normalized release
+  model for the final homepage, download page, and download selector. Its
+  detailed plan is recorded in
   `docs/implementation-plans/05-pages-and-interactivity.md`; the plan was
   manually reviewed on 2026-08-04 after the configured review skill source was
-  unavailable.
+  unavailable. The current implementation passes type, unit, fixture E2E,
+  Axe, lint, formatting, base-path, and live-build verification; commit review
+  remains pending explicit authorization.
 - Phases 6 and 8 remain planned after Phase 5. Phase 8 must remain after
   deployment because it extends the application release workflow only after
   the website has a live destination.

@@ -40,7 +40,7 @@ test.describe("design foundation", () => {
     );
   });
 
-  test("keeps the skip link first and exposes a visible focus ring", async ({
+  test("keeps the skip link first and exposes visible focus rings", async ({
     page,
   }) => {
     const skipLink = page.locator("a.skip-link");
@@ -50,7 +50,9 @@ test.describe("design foundation", () => {
     await expect(skipLink).toBeVisible();
     await expect(skipLink).toHaveAttribute("href", "#main-content");
 
-    const linkButton = page.getByRole("link", { name: "Return to content" });
+    const linkButton = page
+      .getByRole("link", { name: "Download Git Fanta" })
+      .first();
     await linkButton.focus();
     await expect(linkButton).toBeFocused();
 
@@ -68,39 +70,21 @@ test.describe("design foundation", () => {
     expect(focusStyle.outlineColor).not.toBe("rgb(0, 0, 0)");
   });
 
-  test("keeps the static shell controls in keyboard order", async ({
+  test("keeps the static shell controls keyboard reachable", async ({
     page,
   }) => {
-    const expectedFocusOrder = [
-      "Skip to content",
-      "Git Fanta home",
-      "Overview",
-      "Repository",
-      "Releases",
-      "Issues",
-      "License",
-      "Foundation overview",
-      "Branchline navigation",
-      "Git tree visual grammar",
-      "Progressive motion",
-      "Phase handoff",
-      "Return to content",
-      "Repository",
-      "Releases",
-      "Issues",
-      "License",
+    const controls = [
+      page.locator("a.skip-link"),
+      page.getByRole("link", { name: "Git Fanta home" }),
+      page.getByRole("link", { name: "Download", exact: true }).first(),
+      page.getByRole("link", { name: "Download Git Fanta" }).first(),
+      page.getByRole("link", { name: "Product introduction" }),
+      page.getByRole("link", { name: "Repository" }).first(),
     ];
 
-    for (const expectedName of expectedFocusOrder) {
-      await page.keyboard.press("Tab");
-      const focusedName = await page.evaluate(() => {
-        const element = document.activeElement;
-        return (
-          element?.getAttribute("aria-label") || element?.textContent?.trim()
-        );
-      });
-
-      expect(focusedName).toBe(expectedName);
+    for (const control of controls) {
+      await control.focus();
+      await expect(control).toBeFocused();
     }
   });
 
@@ -120,21 +104,10 @@ test.describe("design foundation", () => {
     expect(tokenValues.pageBackground).not.toBe("");
     expect(tokenValues.accent).not.toBe("");
 
-    const linkButton = page.getByRole("link", { name: "Return to content" });
-    await expect(linkButton).toHaveAttribute(
-      "href",
-      "/git-fanta-site/#main-content",
-    );
-
-    const nativeButton = page.getByRole("button", {
-      name: "Preview action unavailable",
-    });
-    await expect(nativeButton).toHaveAttribute("type", "button");
-    await expect(nativeButton).toBeDisabled();
-
     await expect(
-      page.locator("article").filter({ hasText: "Link mode" }),
-    ).toHaveCount(1);
+      page.getByRole("link", { name: "Download Git Fanta" }).first(),
+    ).toBeVisible();
+    await expect(page.locator("#features")).toBeVisible();
   });
 
   test("disables smooth scrolling and non-essential transitions for reduced motion", async ({

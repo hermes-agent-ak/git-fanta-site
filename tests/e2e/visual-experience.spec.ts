@@ -14,11 +14,11 @@ test.describe("Branchline visual experience", () => {
     const links = branchline.getByRole("link");
 
     await expect(branchline).toHaveCount(1);
-    await expect(links).toHaveCount(5);
-    await expect(links.nth(0)).toHaveAttribute("href", "#foundation");
+    await expect(links).toHaveCount(6);
+    await expect(links.nth(0)).toHaveAttribute("href", "#hero");
     await expect(links.nth(0)).toHaveAttribute("aria-current", "location");
     await expect(links.nth(0)).toHaveAttribute("data-active", "true");
-    await expect(links.nth(4)).toHaveAttribute("href", "#handoff");
+    await expect(links.nth(5)).toHaveAttribute("href", "#open-source");
     await expect(branchline.locator('[data-active="true"]')).toHaveCount(1);
     await expect(branchline.locator('[aria-current="location"]')).toHaveCount(
       1,
@@ -38,7 +38,7 @@ test.describe("Branchline visual experience", () => {
       await expect(link).toHaveAttribute("aria-current", "location");
     }
 
-    await expect(page.locator("#git-tree")).toBeVisible();
+    await expect(page.locator('[data-visual="git-tree"]')).toBeVisible();
   });
 
   test("renders a decorative graph that does not carry semantic content", async ({
@@ -48,8 +48,35 @@ test.describe("Branchline visual experience", () => {
 
     await expect(graph).toHaveCount(1);
     await expect(graph).toHaveAttribute("aria-hidden", "true");
-    await expect(graph.locator("[data-commit-marker]")).toHaveCount(5);
+    await expect(graph.locator("[data-commit-marker]")).toHaveCount(6);
     await expect(graph.locator('[data-motion="branch-trace"]')).toHaveCount(1);
+  });
+
+  test("uses smooth paths for the workflow branch and merge", async ({
+    page,
+  }) => {
+    const graph = page.locator(".workflow-preview__graph");
+    await expect(graph.locator(".workflow-preview__paths")).toHaveAttribute(
+      "viewBox",
+      "0 0 240 240",
+    );
+    await expect(
+      graph.locator(".workflow-preview__path--main"),
+    ).toHaveAttribute("d", /C/);
+    await expect(
+      graph.locator(".workflow-preview__path--branch"),
+    ).toHaveAttribute("d", /^M168 72 C.*C/);
+    await expect(
+      graph.locator('[class*="workflow-preview__node--branch-"]'),
+    ).toHaveCount(2);
+    await expect(
+      graph.locator(".workflow-preview__node--branch-one"),
+    ).toBeVisible();
+    await expect(
+      graph.locator(".workflow-preview__node--branch-two"),
+    ).toBeVisible();
+    await expect(graph.locator(".workflow-preview__node")).toHaveCount(7);
+    await expect(graph.locator(".workflow-preview__node--merge")).toBeVisible();
   });
 
   test("keeps the anchor list usable in the mobile presentation", async ({
@@ -111,11 +138,9 @@ test.describe("Branchline visual experience", () => {
     await expect(page.locator("#main-content")).toBeVisible();
   });
 
-  test("renders the fixture release version in the handoff section", async ({
+  test("renders the fixture release version in the download section", async ({
     page,
   }) => {
-    await expect(page.locator("#handoff")).toContainText(
-      "Latest release: 1.0.2",
-    );
+    await expect(page.locator("#download")).toContainText("Git Fanta 1.0.2");
   });
 });

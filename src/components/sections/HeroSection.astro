@@ -1,0 +1,44 @@
+---
+import type { ProductContent } from "../../content/product";
+import Button from "../ui/Button.astro";
+import { siteHref } from "../../lib/site-url";
+
+interface Props {
+  product: ProductContent;
+  baseUrl?: string;
+}
+
+const { product, baseUrl = import.meta.env.BASE_URL } = Astro.props;
+---
+
+<section
+  id="hero"
+  class="page-section page-section--hero"
+  aria-labelledby="hero-heading"
+  data-experience-section
+>
+  <div class="hero-section__copy">
+    <p class="eyebrow">Git / desktop / open source</p>
+    <h1 id="hero-heading" class="text-display">{product.name}</h1>
+    <p class="hero-section__tagline">{product.tagline}.</p>
+    <p class="lede">{product.summary}</p>
+    <div class="hero-section__actions">
+      <Button href={siteHref("/download/", baseUrl)} size="lg">
+        Download Git Fanta
+      </Button>
+      <Button
+        href="https://github.com/hermes-agent-ak/git-fanta"
+        variant="secondary"
+        size="lg"
+      >
+        Explore the repository
+      </Button>
+    </div>
+  </div>
+  <div class="hero-section__signal" aria-label="Product signal">
+    <span class="hero-section__signal-dot" aria-hidden="true"></span>
+    <span>refs/heads/main</span>
+    <span class="hero-section__signal-divider" aria-hidden="true">→</span>
+    <span>clearer everyday Git</span>
+  </div>
+</section>
