@@ -2,12 +2,14 @@
 
 The official website for [Git Fanta](https://github.com/hermes-agent-ak/git-fanta), a modernized git-cola fork focused on a cleaner user experience and smoother everyday Git workflows.
 
+Visit the live website: [hermes-agent-ak.github.io/git-fanta-site](https://hermes-agent-ak.github.io/git-fanta-site/).
+
 This repository is intentionally separate from the Python/Qt application repository. It contains the website, its static-build tooling, its tests, and its deployment configuration.
 
-Phases 0–3 and the promoted GitHub Pages deployment are complete. The current
-branch completes the Phase 4 release-data boundary; final page composition and
-the download experience remain in Phase 5. The architectural source of truth is
-the [Master Planning and Implementation Brief](docs/master-planning-and-implementation-brief.md).
+Phases 0–5 and the promoted GitHub Pages deployment are complete. The next
+planned phase adds the final quality, performance, security, and dependency
+gates. The architectural source of truth is the
+[Master Planning and Implementation Brief](docs/master-planning-and-implementation-brief.md).
 
 ## Why this architecture
 

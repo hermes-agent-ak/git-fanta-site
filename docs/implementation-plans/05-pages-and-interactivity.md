@@ -1,11 +1,14 @@
 ---
-status: in_progress
+status: complete
 phase: 5
-execution_order: next
+execution_order: completed
 plan_created_at: 2026-08-04
 plan_reviewed_at: 2026-08-05
 plan_review_status: complete
 plan_review_method: plan-review
+completed_at: 2026-08-06
+implementation_head: 406a3d4
+integration_head: 8364c84
 depends_on:
   - docs/implementation-plans/00-project-bootstrap.md
   - docs/implementation-plans/01-design-system-and-layout.md
@@ -733,10 +736,11 @@ thresholds or exclusions.
 
 ## Implementation progress
 
-The implementation is in progress on
-`feature/phase-5-pages-and-interactivity`. The current follow-up is committed
-and pushed at `517cb71` (`fix(site): stabilize route tracking and download
-selection`). The following scope is present on that branch:
+Phase 5 is complete at implementation head `406a3d4`
+(`fix(download): preserve direct radio interaction`) on
+`feature/phase-5-pages-and-interactivity`. It was merged into `dev` through
+PR #15 at integration head `8364c84` on 2026-08-06. The following scope is
+present in that merged implementation:
 
 - page-experience contract, final homepage section models, source-backed feature
   content, and the serializable release/download view model;
@@ -758,65 +762,58 @@ selection`). The following scope is present on that branch:
   associations, and a full-card click target. The associated fixed-delay test
   now waits for observable anchor geometry.
 
-Completed verification so far: `pnpm check`, `pnpm test:unit`, fixture build,
-the dedicated pages/downloads/metadata E2E suites, the full fixture E2E suite,
-`pnpm test:a11y`, `pnpm format:check`, targeted documentation formatting,
-`pnpm lint`, `git diff --check`, root and deployment base-path builds, live
-build, and generated-output inspection. The 2026-08-05 navigation correction
-was additionally reviewed at 320/375/640/768/1024/1280/1440 CSS pixels and
-verified with 56 unit tests, 32 fixture E2E tests, four dedicated Axe tests,
-mobile open/closed and no-JavaScript states, reduced motion, forced colors,
-anchor geometry, and horizontal-overflow checks. The follow-up additionally
-confirmed zero horizontal overflow and opaque stack geometry in live browser
-renders at 320, 768, 1024, and 1440 CSS pixels. The responsive-navigation staged
-diff passed final review; broader Phase 5 acceptance remains before this plan can
-be marked complete. The final attached-panel follow-up passed visual review at
-320/375/640/768/1024/1280/1440 CSS pixels and also verified that opening the
-sticky header after scrolling pushes content instead of covering the reading
-position. Compact footer review additionally removed the duplicate link list
-below 64rem while retaining the product identity and complete desktop footer
-navigation. The product-showcase follow-up isolates the redacted interface crop
-from the ready derived media, excludes its logo and orange decorative frame, and
-passed visual review at 320, 768, and 1440 CSS pixels.
-The final route-tracking follow-up reproduced and removed the former desktop
-reversions (`Hero → Showcase → Hero` and equivalent later jumps). It adds unit
-coverage for monotonic crossing, pending click state, interruption, and
-document-end handling plus a browser regression that requires the exact ordered
-route at 1024 and 1440 CSS pixels. The combined final state passed 58 unit
-tests, the 12-test visual browser suite, build/type/lint/format/diff checks,
-and the local SonarQube Quality Gate with 0 new violations, 85.0% new-code
-coverage, and 2.61% new duplicated-line density.
+Completion verification on 2026-08-06 passed `pnpm check` with zero diagnostics,
+`pnpm test:unit` with 58 tests, the fixture build and full Playwright suite with
+33 tests, and `pnpm test:a11y` with four Axe checks. A live-mode production
+build also passed against GitHub release data. Generated-output inspection found
+no `GITHUB_TOKEN`, GitHub API endpoint, raw release fields, or release-markup
+leakage. `pnpm format:check`, `pnpm lint`, and `git diff --check` were also
+run for the implementation follow-ups.
+
+The 2026-08-05 navigation correction was visually reviewed at
+320/375/640/768/1024/1280/1440 CSS pixels, including mobile open/closed and
+no-JavaScript states, reduced motion, forced colors, anchor geometry, and
+horizontal-overflow checks. The final route-tracking follow-up removed the
+former desktop reversions (`Hero → Showcase → Hero` and equivalent later jumps)
+and adds unit coverage for monotonic crossing, pending click state,
+interruption, and document-end handling plus a browser regression requiring the
+exact ordered route at 1024 and 1440 CSS pixels. The project owner additionally
+confirmed successful local operation at closure.
+
+Phase 6 remains responsible for the final Lighthouse/performance, security,
+dependency-review, and expanded browser/device gates; those gates are not
+silently reclassified as Phase 5 work.
 
 ## Acceptance criteria
 
-- [ ] The page-experience contract names Branchline, Git Tree Reveal, Release
+- [x] The page-experience contract names Branchline, Git Tree Reveal, Release
       Trace, Download Selector, and clean showroom patterns with states,
       fallbacks, accessibility behavior, and performance budgets.
-- [ ] Homepage order is Hero, Product showcase, Core features, Git workflow
+- [x] Homepage order is Hero, Product showcase, Core features, Git workflow
       preview, Download, Open source, Footer, exactly once.
-- [ ] `/`, `/download/`, and `/404.html` are statically generated and preserve
+- [x] `/`, `/download/`, and `/404.html` are statically generated and preserve
       skip link, `#main-content`, landmarks, and heading hierarchy.
-- [ ] Temporary foundation copy is replaced with source-backed Git Fanta
+- [x] Temporary foundation copy is replaced with source-backed Git Fanta
       content and purposeful Git-native composition.
 - [x] The product preview shows only the redacted interface crop from the derived
       showcase; its logo/decorative frame stay hidden and the pending screenshot
       is never presented as official.
-- [ ] Every public feature claim has source path/section metadata; no
+- [x] Every public feature claim has source path/section metadata; no
       unsupported feature, rating, testimonial, metric, price, or OS claim is
       emitted.
-- [ ] Phase 4 `LatestRelease` is transformed to a page-safe model; raw GitHub
+- [x] Phase 4 `LatestRelease` is transformed to a page-safe model; raw GitHub
       responses never reach components.
-- [ ] Known Windows, Linux, macOS, Python, and checksum assets are exposed when
+- [x] Known Windows, Linux, macOS, Python, and checksum assets are exposed when
       present, plus the complete GitHub Release link.
-- [ ] Ordering and labels are deterministic; missing assets are explicit and no
+- [x] Ordering and labels are deterministic; missing assets are explicit and no
       filename is guessed.
-- [ ] Manual selection always works; OS detection is optional and no page load
+- [x] Manual selection always works; OS detection is optional and no page load
       begins a download.
-- [ ] Selection and unavailable states use concise text/`aria-live="polite"`
+- [x] Selection and unavailable states use concise text/`aria-live="polite"`
       announcements without moving focus or redundantly re-reading the action.
-- [ ] Unsigned-build, SmartScreen/Gatekeeper, SHA256SUMS, and alongside-git-cola
+- [x] Unsigned-build, SmartScreen/Gatekeeper, SHA256SUMS, and alongside-git-cola
       guidance is visible.
-- [ ] Only `DownloadSelector.tsx` is hydrated React; all other content is static
+- [x] Only `DownloadSelector.tsx` is hydrated React; all other content is static
       Astro and useful without JavaScript.
 - [x] Below 64rem, SiteHeader is the only navigation surface and exposes a
       conventional 44px hamburger disclosure; Branchline is omitted rather than
@@ -834,18 +831,18 @@ coverage, and 2.61% new duplicated-line density.
 - [x] Desktop active-route state advances monotonically through every homepage
       section at 1024px and 1440px; a clicked target does not regress before it
       is reached, and the final section becomes active at document end.
-- [ ] Canonical, title, description, OG, social image, favicon, robots, sitemap,
+- [x] Canonical, title, description, OG, social image, favicon, robots, sitemap,
       and conservative SoftwareApplication JSON-LD are base-path-safe.
-- [ ] Pages work at 320/375/640/768/1024/1280/1440 CSS px, 200% and 400%
+- [x] Pages work at 320/375/640/768/1024/1280/1440 CSS px, 200% and 400%
       zoom/reflow, and text spacing overrides without critical overflow;
       controls meet the documented target-size contract.
-- [ ] Keyboard, focus, names, landmarks, headings, contrast, native controls,
+- [x] Keyboard, focus, names, landmarks, headings, contrast, native controls,
       reduced motion, and non-color states pass review and Axe.
-- [ ] Missing release/assets, JS disabled, unsupported platform, media failure,
+- [x] Missing release/assets, JS disabled, unsupported platform, media failure,
       and 404 recovery have understandable fallbacks.
-- [ ] Fixture checks are deterministic, live production remains live-only, and
+- [x] Fixture checks are deterministic, live production remains live-only, and
       no token/raw release content reaches client output.
-- [ ] Phase 6 remains responsible for final Lighthouse/performance/security
+- [x] Phase 6 remains responsible for final Lighthouse/performance/security
       gates; Phase 5 supplies the contracts and page tests.
 
 ## Failure cases
@@ -935,11 +932,9 @@ with the `plan-review` workflow:
 - the public plan contains no absolute machine paths, secrets, token values, or
   legal accessibility-certification claim.
 
-The Phase 5 scope is executable after the current Phase 4 head. Phase 6 owns
-the final quality/security/performance gate and Phase 8 remains correctly
-deferred. The responsive-navigation and route-tracking follow-ups passed review
-and were pushed to the feature branch at `517cb71`; broader Phase 5 acceptance
-remains before the phase is marked complete.
+Phase 5 is complete. Phase 6 owns the final quality/security/performance gate,
+and Phase 8 remains correctly deferred until that work is ready to integrate
+with the separate application repository.
 
 ## References and legal scope note
 
