@@ -230,8 +230,10 @@ system is coherent, not because it adds novelty-only decoration.
   focus on dark and elevated surfaces.
 - Orange, diff-green, warning, and neutral colors reinforce state but never
   carry meaning alone.
-- The derived showcase is labelled in visible caption text and useful alt text;
-  the pending original screenshot is never presented as official media.
+- The visible product preview isolates only the redacted interface crop from the
+  derived showcase. Its composite logo and orange decorative frame stay outside
+  the viewport, while caption and alt text retain the provenance boundary; the
+  pending original screenshot is never presented as official media.
 - No fake metrics, testimonials, ratings, pricing, activity counters, or
   unsupported product badges.
 

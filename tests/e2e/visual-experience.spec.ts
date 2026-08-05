@@ -260,7 +260,7 @@ test.describe("Branchline visual experience", () => {
     }
   });
 
-  test("centers the mobile graph and enlarges the showcase image", async ({
+  test("centers the mobile graph and isolates the screenshot preview", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 320, height: 900 });
@@ -283,9 +283,20 @@ test.describe("Branchline visual experience", () => {
         ".workflow-preview__node--branch-one",
       );
       const image = document.querySelector<HTMLElement>(".showcase-frame img");
+      const imageViewport = document.querySelector<HTMLElement>(
+        ".showcase-frame__viewport",
+      );
       const tree = document.querySelector<HTMLElement>(".git-tree");
 
-      if (!content || !graph || !mainNode || !branchNode || !image || !tree) {
+      if (
+        !content ||
+        !graph ||
+        !mainNode ||
+        !branchNode ||
+        !image ||
+        !imageViewport ||
+        !tree
+      ) {
         return null;
       }
 
@@ -294,6 +305,7 @@ test.describe("Branchline visual experience", () => {
       const mainBox = mainNode.getBoundingClientRect();
       const branchBox = branchNode.getBoundingClientRect();
       const imageBox = image.getBoundingClientRect();
+      const imageViewportBox = imageViewport.getBoundingClientRect();
       const treeBox = tree.getBoundingClientRect();
       const contentStyle = getComputedStyle(content);
 
@@ -305,7 +317,13 @@ test.describe("Branchline visual experience", () => {
         graphVisualCenter:
           (mainBox.x + mainBox.width / 2 + branchBox.x + branchBox.width / 2) /
           2,
-        imageRatio: imageBox.height / imageBox.width,
+        screenshotRatio: imageViewportBox.width / imageViewportBox.height,
+        croppedSourceLeft:
+          (imageViewportBox.left - imageBox.left) / imageBox.width,
+        croppedSourceTop:
+          (imageViewportBox.top - imageBox.top) / imageBox.height,
+        croppedSourceRight:
+          (imageViewportBox.right - imageBox.left) / imageBox.width,
       };
     });
 
@@ -316,7 +334,11 @@ test.describe("Branchline visual experience", () => {
     expect(
       Math.abs(layout!.graphVisualCenter - layout!.graphCenter),
     ).toBeLessThan(2);
-    expect(layout!.imageRatio).toBeGreaterThan(0.7);
+    expect(layout!.screenshotRatio).toBeGreaterThan(1.3);
+    expect(layout!.screenshotRatio).toBeLessThan(1.35);
+    expect(layout!.croppedSourceLeft).toBeCloseTo(48 / 1536, 2);
+    expect(layout!.croppedSourceTop).toBeCloseTo(88 / 1024, 2);
+    expect(layout!.croppedSourceRight).toBeLessThan(0.75);
   });
 
   test("keeps a complete static state when reduced motion is requested", async ({

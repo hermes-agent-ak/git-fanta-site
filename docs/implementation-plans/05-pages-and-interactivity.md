@@ -229,10 +229,11 @@ budget.
   Preserve readable line length, whitespace, and visible focus at 320, 768, and
   1440 CSS pixels.
 - Make memorable details purposeful: Branchline progression, release trace,
-  derived-showcase framing, copyable release metadata, and download confidence.
+  a focused interface preview, copyable release metadata, and download confidence.
   No fake activity, testimonials, ratings, counters, pricing, or badges.
-- Label the WebP as derived project showcase media in visible nearby context
-  and alternative text. Do not call it an official screenshot.
+- Crop the ready derived WebP to its redacted interface region so the composite
+  logo and orange decorative frame are not visible. Keep the provenance boundary
+  in nearby caption and alternative text; do not call it an official screenshot.
 
 ### 2. Add source-backed content models
 
@@ -763,7 +764,9 @@ be marked complete. The final attached-panel follow-up passed visual review at
 sticky header after scrolling pushes content instead of covering the reading
 position. Compact footer review additionally removed the duplicate link list
 below 64rem while retaining the product identity and complete desktop footer
-navigation.
+navigation. The product-showcase follow-up isolates the redacted interface crop
+from the ready derived media, excludes its logo and orange decorative frame, and
+passed visual review at 320, 768, and 1440 CSS pixels.
 
 ## Acceptance criteria
 
@@ -776,7 +779,8 @@ navigation.
       skip link, `#main-content`, landmarks, and heading hierarchy.
 - [ ] Temporary foundation copy is replaced with source-backed Git Fanta
       content and purposeful Git-native composition.
-- [ ] The derived showcase is labelled as derived media; the pending screenshot
+- [x] The product preview shows only the redacted interface crop from the derived
+      showcase; its logo/decorative frame stay hidden and the pending screenshot
       is never presented as official.
 - [ ] Every public feature claim has source path/section metadata; no
       unsupported feature, rating, testimonial, metric, price, or OS claim is

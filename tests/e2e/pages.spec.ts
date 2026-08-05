@@ -15,8 +15,9 @@ test.describe("final page composition", () => {
     await expect(page.locator("#workflow")).toBeVisible();
     await expect(page.locator("#download")).toBeVisible();
     await expect(page.locator("#open-source")).toBeVisible();
+    await expect(page.locator(".showcase-frame__viewport")).toHaveCount(1);
     await expect(page.locator(".showcase-frame figcaption")).toContainText(
-      "Derived project showcase media",
+      "Derived interface preview",
     );
     await expect(
       page

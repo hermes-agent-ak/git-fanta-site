@@ -1058,19 +1058,23 @@ button:disabled {
 
 .showcase-frame {
   margin: 0;
+}
+
+.showcase-frame__viewport {
+  position: relative;
+  aspect-ratio: 1068 / 803;
   overflow: hidden;
-  border: 1px solid var(--gf-color-border-strong);
-  border-radius: var(--gf-radius-lg);
   background: var(--gf-color-background-page);
-  box-shadow: var(--gf-shadow-md);
 }
 
 .showcase-frame img {
+  position: absolute;
+  top: -10.96%;
+  left: -4.5%;
   display: block;
-  width: 100%;
+  width: 143.82%;
+  max-width: none;
   height: auto;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
 }
 
 .showcase-frame figcaption {
@@ -1622,11 +1626,6 @@ button:disabled {
     margin-inline: 1.25rem;
   }
 
-  .showcase-frame img {
-    aspect-ratio: 4 / 3;
-    object-position: left center;
-  }
-
   .workflow-preview__paths {
     transform: translateX(-30%);
     transform-origin: top left;
@@ -1651,7 +1650,7 @@ button:disabled {
   .feature-card,
   .download-selector,
   .download-asset-link,
-  .showcase-frame {
+  .showcase-frame__viewport {
     border: 1px solid CanvasText;
     box-shadow: none;
   }
