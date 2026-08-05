@@ -23,6 +23,7 @@ export function initializeBranchlineEnhancement(
     .map((link) => root.getElementById(link.hash.slice(1)))
     .filter((section): section is HTMLElement => section !== null);
   const sectionIds = new Set(sections.map((section) => section.id));
+  let pendingNavigation: { id: string; expiresAt: number } | undefined;
 
   const setActive = (id: string) => {
     if (!sectionIds.has(id)) return;
@@ -42,7 +43,13 @@ export function initializeBranchlineEnhancement(
   links.forEach((link) => {
     link.addEventListener("click", () => {
       const id = link.hash.slice(1);
-      if (id) setActive(id);
+      if (id) {
+        setActive(id);
+        pendingNavigation = {
+          id,
+          expiresAt: Date.now() + 1000,
+        };
+      }
     });
   });
 
@@ -55,7 +62,17 @@ export function initializeBranchlineEnhancement(
             (left, right) => right.intersectionRatio - left.intersectionRatio,
           )[0];
 
-        if (visible) setActive(visible.target.id);
+        if (!visible) return;
+
+        if (pendingNavigation) {
+          if (Date.now() < pendingNavigation.expiresAt) {
+            if (visible.target.id !== pendingNavigation.id) return;
+          }
+
+          pendingNavigation = undefined;
+        }
+
+        setActive(visible.target.id);
       },
       { rootMargin: "-20% 0px -55% 0px", threshold: [0, 0.25, 0.6] },
     );

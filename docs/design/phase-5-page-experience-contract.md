@@ -35,6 +35,49 @@ it.
 
 ## Named interaction contracts
 
+### Primary Navigation
+
+Purpose: provide the one global route set for the website without competing
+with homepage-local orientation.
+
+Semantic contract:
+
+- `SiteHeader.astro` owns the labelled `Primary` navigation on every route.
+- Below 64rem, a conventional hamburger uses a native `<button>` with
+  `aria-expanded` and `aria-controls` to reveal ordinary navigation links. It
+  does not use ARIA `menu` or `menuitem` roles.
+- The toggle and disclosed links provide at least 44 CSS-pixel targets. Internal
+  destinations precede a visually labelled external-project group, and
+  `aria-current="page"` remains on the current internal route.
+- At and above 64rem, the complete link list is inline and the disclosure toggle
+  is not displayed. The header remains sticky at the viewport top.
+
+Responsive, interaction, and fallback contract:
+
+- The header remains sticky at every supported width and uses an opaque page
+  background so content never shows through its reading boundary.
+- Below 64rem, the disclosed navigation is a full-viewport-width extension of
+  the header. It sits flush against the header row, has no floating-card or
+  modal treatment, and expands document layout instead of covering page
+  content. Its inner padding remains aligned with the responsive page gutter.
+- The link groups form one column on narrow phones and two balanced columns from
+  40rem through 63.99rem. On short landscape viewports, only the disclosed link
+  surface scrolls while the header row and close control stay available.
+- Do not add a scrim, dialog semantics, focus trap, side drawer, or body-scroll
+  lock for this shallow six-link navigation.
+- Below 64rem, the footer keeps its product identity but omits its duplicate
+  primary-link list. At and above 64rem, the footer links remain available as a
+  secondary end-of-page route set.
+- Without JavaScript, the server-rendered navigation and links remain visible
+  while the inactive toggle stays hidden. A small enhancement owns disclosure
+  state and may close it on Escape or outside activation, but does not trap
+  focus or introduce a client framework.
+- Reduced-motion users receive the open/closed state without transition.
+
+Budget: semantic Astro markup, CSS, and at most one small event-driven
+enhancement; no hydrated framework, scrim, focus trap, body-scroll loop, or
+menu library.
+
 ### Branchline Navigation
 
 Purpose: help a reader understand where they are in the homepage and jump to a
@@ -51,23 +94,35 @@ Semantic contract:
 
 Responsive contract:
 
-- Wide layouts use the existing sticky branchline rail/map.
-- Below the mobile breakpoint, the existing native `<details>` disclosure
-  exposes a normal anchor list. Summary and links must be keyboard and touch
-  operable without JavaScript.
+- Below 64rem, omit the Branchline surface. Do not replace it with a fixed
+  bottom bar or horizontally scrolling route: those patterns would compete with
+  the global navigation and consume scarce reading space. The ordered headings
+  and ordinary document flow remain the complete mobile route.
+- From 64rem through 79.99rem, the sticky route map uses a full-width intro row
+  and six-column link row. At and above 80rem, it uses a compact side-by-side
+  intro and six-column route.
+- Every desktop label and conceptual ref remains visible without ellipsis.
+  Breakpoint-specific scroll margins place target metadata and headings below
+  the complete sticky stack.
+- At and above 64rem, Branchline sticks directly below the sticky global header.
+  A full-viewport-width opaque background fills the intentional space between
+  both surfaces so scrolling content never appears inside that gap.
 - The DOM order remains header → main content → footer; no scroll hijacking or
   focus movement is allowed.
 
 Motion and fallback:
 
-- `branchline-enhancement.ts` may update active state through
+- `branchline-enhancement.ts` may update only active link state through
   `IntersectionObserver`; if unavailable, the server-rendered first state and
   ordinary anchor clicks remain usable.
 - Active-state enhancement is not required to reach content.
+- Anchor activation never closes a disclosure or moves focus.
+- Compact layouts remain complete when Branchline is hidden because the
+  component contains no unique content or action.
 - No runtime data is fetched and no decorative JS is required.
 
 Budget: no additional JavaScript beyond the existing small observer module;
-links and summary controls remain usable with scripting disabled.
+all local-route links remain visible and usable with scripting disabled.
 
 ### Git Tree Reveal
 
@@ -187,7 +242,7 @@ embed, and no full animation/UI library.
 
 | State or condition        | Required result                                                                                                                              |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Keyboard only             | Skip link, header, Branchline, every section action, selector, disclosures, direct links, and footer are reachable in DOM order.             |
+| Keyboard only             | Skip link, header disclosure/links, Branchline, every section action, selector, direct links, and footer are reachable in DOM order.         |
 | Screen reader             | Landmarks, heading levels, image decisions, link names, selected state, unavailable state, and external-link behavior are announced clearly. |
 | 200%/400% zoom and reflow | Content remains readable, controls remain reachable, and refs/file names wrap without critical horizontal overflow.                          |
 | Text-spacing override     | Increased line/paragraph/letter/word spacing does not clip or hide content.                                                                  |
@@ -195,8 +250,9 @@ embed, and no full animation/UI library.
 | Forced colors             | Borders, focus, links, selected state, warnings, and disabled/unavailable states remain distinguishable using system colors and text.        |
 | Touch                     | Controls meet at least 24×24 CSS px where exceptions do not apply; primary actions target 44 CSS px.                                         |
 | Missing release asset     | Label remains visible, URL is null, no download action is rendered, and complete-release fallback remains.                                   |
-| JavaScript disabled       | Static content, direct links, warnings, metadata, and recovery paths remain complete.                                                        |
+| JavaScript disabled       | Header links, desktop local-route links, static content, direct links, warnings, metadata, and recovery paths remain complete.               |
 | Focus after interaction   | Selection/disclosure does not steal focus or move the user unexpectedly.                                                                     |
+| Breakpoint transition     | Mobile keeps only the sticky header; desktop forms an opaque two-surface sticky stack with unobscured anchors.                               |
 
 ## Route contracts
 
@@ -204,7 +260,10 @@ embed, and no full animation/UI library.
 
 - Static build loads the validated latest release and approved content models.
 - Product sections occur exactly once in the sequence defined above.
-- Header has internal Overview and Download links plus external project links.
+- Header has internal Overview and Download links plus external project links;
+  it uses the global disclosure below 64rem and inline navigation above it.
+- Branchline is omitted below 64rem and forms an opaque sticky stack beneath the
+  sticky global header above that breakpoint.
 - The showcase caption distinguishes derived media from an official screenshot.
 
 ### `/download/`
@@ -235,8 +294,10 @@ Before Phase 5 is marked complete:
    and lint sequentially.
 2. Use keyboard-only navigation and inspect accessible names on all three HTML
    routes.
-3. Inspect 320, 768, and 1440 CSS-pixel layouts plus 200%/400% zoom, reflow,
-   reduced motion, text spacing, and forced colors where supported.
+3. Inspect 320, 375, 640, 768, 1024, 1280, and 1440 CSS-pixel layouts plus
+   200%/400% zoom, reflow, reduced motion, text spacing, and forced colors where
+   supported. Verify one sticky navigator, complete route labels/refs, 44px
+   mobile navigation targets, and unobscured anchor destinations.
 4. Inspect generated output for raw tokens, browser GitHub fetches, guessed
    URLs, raw release Markdown/HTML, unsupported JSON-LD fields, and broken
    project-base paths.

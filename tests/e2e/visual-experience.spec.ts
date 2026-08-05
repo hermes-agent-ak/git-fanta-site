@@ -10,7 +10,7 @@ test.describe("Branchline visual experience", () => {
   test("provides normal anchor navigation with an active section", async ({
     page,
   }) => {
-    const branchline = page.getByRole("navigation", { name: "Branchline" });
+    const branchline = page.getByRole("navigation", { name: "On this page" });
     const links = branchline.getByRole("link");
 
     await expect(branchline).toHaveCount(1);
@@ -79,21 +79,75 @@ test.describe("Branchline visual experience", () => {
     await expect(graph.locator(".workflow-preview__node--merge")).toBeVisible();
   });
 
-  test("keeps the anchor list usable in the mobile presentation", async ({
+  test("omits the secondary route surface on compact layouts", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 320, height: 800 });
+    for (const width of [320, 768]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto(basePath);
 
-    const branchline = page.getByRole("navigation", { name: "Branchline" });
-    await expect(branchline.locator("summary")).toBeVisible();
-    await expect(branchline.getByRole("link").first()).toBeVisible();
+      const branchline = page.getByRole("navigation", { name: "On this page" });
 
-    const hasNoHorizontalOverflow = await page.evaluate(
-      () =>
-        document.documentElement.scrollWidth <=
-        document.documentElement.clientWidth,
-    );
-    expect(hasNoHorizontalOverflow).toBe(true);
+      await expect(branchline).toBeHidden();
+      await expect(branchline.locator("details")).toHaveCount(0);
+
+      const hasNoHorizontalOverflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth <=
+          document.documentElement.clientWidth,
+      );
+      expect(hasNoHorizontalOverflow, `overflow at ${width}px`).toBe(true);
+    }
+  });
+
+  test("forms an opaque desktop sticky stack without adding a mobile route bar", async ({
+    page,
+  }) => {
+    for (const width of [1024, 1440, 320, 768]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(basePath);
+      await page.evaluate(() => window.scrollTo(0, 900));
+
+      const layout = await page.evaluate(() => {
+        const header = document.querySelector<HTMLElement>("header")!;
+        const branchline = document.querySelector<HTMLElement>(
+          "[data-branchline-nav]",
+        )!;
+        const surface = branchline.querySelector<HTMLElement>(
+          ".branchline-nav__surface",
+        )!;
+        const headerBox = header.getBoundingClientRect();
+        const branchlineBox = branchline.getBoundingClientRect();
+        const surfaceBox = surface.getBoundingClientRect();
+        const bridgeStyle = getComputedStyle(branchline, "::before");
+
+        return {
+          headerPosition: getComputedStyle(header).position,
+          branchlineDisplay: getComputedStyle(branchline).display,
+          branchlinePosition: getComputedStyle(branchline).position,
+          headerBottom: headerBox.bottom,
+          branchlineTop: branchlineBox.top,
+          surfaceTop: surfaceBox.top,
+          bridgeBackground: bridgeStyle.backgroundColor,
+          bridgeShadow: bridgeStyle.boxShadow,
+        };
+      });
+
+      expect(layout.headerPosition).toBe("sticky");
+
+      if (width < 1024) {
+        expect(layout.branchlineDisplay).toBe("none");
+        continue;
+      }
+
+      expect(layout.branchlinePosition).toBe("sticky");
+      expect(Math.abs(layout.branchlineTop - layout.headerBottom)).toBeLessThan(
+        1,
+      );
+      expect(layout.surfaceTop).toBeGreaterThanOrEqual(layout.headerBottom + 8);
+      expect(layout.bridgeBackground).not.toBe("rgba(0, 0, 0, 0)");
+      expect(layout.bridgeShadow).not.toBe("none");
+    }
   });
 
   test("keeps the visual route within the layout at review widths", async ({
@@ -111,10 +165,158 @@ test.describe("Branchline visual experience", () => {
 
       expect(hasNoHorizontalOverflow, `overflow at ${width}px`).toBe(true);
       await expect(page.locator('[data-visual="git-tree"]')).toBeVisible();
-      await expect(
-        page.getByRole("navigation", { name: "Branchline" }),
-      ).toBeVisible();
+      const branchline = page.getByRole("navigation", { name: "On this page" });
+      if (width < 1024) {
+        await expect(branchline).toBeHidden();
+      } else {
+        await expect(branchline).toBeVisible();
+      }
     }
+  });
+
+  test("shows every route label and ref without truncation", async ({
+    page,
+  }) => {
+    for (const width of [1024, 1280, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(basePath);
+
+      const clippedContent = await page
+        .getByRole("navigation", { name: "On this page" })
+        .evaluate((navigation) =>
+          Array.from(
+            navigation.querySelectorAll<HTMLElement>(
+              ".branchline-nav__label, code",
+            ),
+          )
+            .filter((element) => element.scrollWidth > element.clientWidth + 1)
+            .map((element) => element.textContent?.trim()),
+        );
+
+      expect(clippedContent, `clipped route content at ${width}px`).toEqual([]);
+    }
+  });
+
+  test("keeps anchor targets below the active sticky navigation", async ({
+    page,
+  }) => {
+    for (const width of [320, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(basePath);
+
+      const link = page
+        .getByRole("navigation", { name: "On this page" })
+        .getByRole("link", { name: "Core features" });
+
+      if (width < 1024) {
+        await page.locator("#features").evaluate((element) => {
+          element.scrollIntoView();
+        });
+      } else {
+        await link.focus();
+        await page.keyboard.press("Enter");
+      }
+      await page.waitForTimeout(1100);
+
+      const geometry = await page.evaluate(() => {
+        const header = document.querySelector("header")!;
+        const branchline = document.querySelector<HTMLElement>(
+          "[data-branchline-nav]",
+        )!;
+        const metadata = document.querySelector<HTMLElement>(
+          "#features .section-heading-row",
+        )!;
+        const heading = document.querySelector<HTMLElement>("#features h2")!;
+        const stickyElement =
+          getComputedStyle(header).position === "sticky" ? header : branchline;
+
+        return {
+          stickyBottom: stickyElement.getBoundingClientRect().bottom,
+          metadataTop: metadata.getBoundingClientRect().top,
+          headingTop: heading.getBoundingClientRect().top,
+        };
+      });
+
+      expect(
+        geometry.metadataTop,
+        `metadata placement at ${width}px`,
+      ).toBeGreaterThanOrEqual(geometry.stickyBottom + 8);
+      expect(
+        geometry.headingTop,
+        `heading placement at ${width}px`,
+      ).toBeGreaterThan(geometry.stickyBottom);
+
+      const activeControl = await page.evaluate(() => ({
+        tagName: document.activeElement?.tagName ?? null,
+        label: document.activeElement?.getAttribute("aria-label") ?? null,
+      }));
+      expect(activeControl, `focus destination at ${width}px`).not.toEqual({
+        tagName: "BUTTON",
+        label: "Open primary navigation",
+      });
+      if (activeControl.tagName === "A") {
+        expect(activeControl.label).toBe("Core features");
+      }
+    }
+  });
+
+  test("centers the mobile graph and enlarges the showcase image", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.goto(basePath);
+    await page
+      .locator(".showcase-frame img")
+      .evaluate((image) => (image as HTMLImageElement).decode());
+
+    const layout = await page.evaluate(() => {
+      const content = document.querySelector<HTMLElement>(
+        ".branchline-content",
+      );
+      const graph = document.querySelector<HTMLElement>(
+        ".workflow-preview__graph",
+      );
+      const mainNode = document.querySelector<HTMLElement>(
+        ".workflow-preview__node--one",
+      );
+      const branchNode = document.querySelector<HTMLElement>(
+        ".workflow-preview__node--branch-one",
+      );
+      const image = document.querySelector<HTMLElement>(".showcase-frame img");
+      const tree = document.querySelector<HTMLElement>(".git-tree");
+
+      if (!content || !graph || !mainNode || !branchNode || !image || !tree) {
+        return null;
+      }
+
+      const contentBox = content.getBoundingClientRect();
+      const graphBox = graph.getBoundingClientRect();
+      const mainBox = mainNode.getBoundingClientRect();
+      const branchBox = branchNode.getBoundingClientRect();
+      const imageBox = image.getBoundingClientRect();
+      const treeBox = tree.getBoundingClientRect();
+      const contentStyle = getComputedStyle(content);
+
+      return {
+        treeCenter: treeBox.x + treeBox.width / 2,
+        treeRailCenter:
+          contentBox.x + Number.parseFloat(contentStyle.paddingLeft) / 2,
+        graphCenter: graphBox.x + graphBox.width / 2,
+        graphVisualCenter:
+          (mainBox.x + mainBox.width / 2 + branchBox.x + branchBox.width / 2) /
+          2,
+        imageRatio: imageBox.height / imageBox.width,
+      };
+    });
+
+    expect(layout).not.toBeNull();
+    expect(Math.abs(layout!.treeCenter - layout!.treeRailCenter)).toBeLessThan(
+      1,
+    );
+    expect(
+      Math.abs(layout!.graphVisualCenter - layout!.graphCenter),
+    ).toBeLessThan(2);
+    expect(layout!.imageRatio).toBeGreaterThan(0.7);
   });
 
   test("keeps a complete static state when reduced motion is requested", async ({

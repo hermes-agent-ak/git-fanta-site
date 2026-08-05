@@ -17,15 +17,14 @@ function shortRef(ref: string): string {
 }
 ---
 
-<nav class="branchline-nav" aria-label="Branchline" data-branchline-nav>
-  <details class="branchline-nav__disclosure" open>
-    <summary>Explore the branchline</summary>
+<nav class="branchline-nav" aria-label="On this page" data-branchline-nav>
+  <div class="branchline-nav__surface">
     <div class="branchline-nav__body">
       <div class="branchline-nav__intro">
-        <p class="eyebrow">Conceptual navigation</p>
+        <p class="eyebrow">Page route / {sections.length} sections</p>
         <p>
-          A visual route through the foundation. Refs are design metadata, not
-          live repository state.
+          Follow the product story commit by commit. Refs are visual metadata,
+          not live repository state.
         </p>
       </div>
       <ol class="branchline-nav__list">
@@ -42,6 +41,7 @@ function shortRef(ref: string): string {
                   aria-current={isCurrent ? "location" : undefined}
                   data-active={isCurrent ? "true" : "false"}
                   data-branchline-ref={section.ref}
+                  data-branchline-tone={section.tone}
                   data-node={section.node}
                 >
                   <span
@@ -60,7 +60,7 @@ function shortRef(ref: string): string {
         }
       </ol>
     </div>
-  </details>
+  </div>
 </nav>
 
 <script>

@@ -33,6 +33,8 @@ function createRoot(ids: string[]) {
   const sections = ids.map((id) => ({ id }));
   const nav = {
     querySelectorAll: vi.fn(() => links),
+    querySelector: vi.fn(() => null),
+    addEventListener: vi.fn(),
   };
   const root = {
     querySelector: vi.fn(() => nav),
@@ -48,6 +50,7 @@ describe("branchline enhancement", () => {
   it("synchronizes one active link after a click and an observed section", () => {
     const { links, root, sections } = createRoot(["foundation", "motion"]);
     let observerCallback: IntersectionObserverCallback | undefined;
+    vi.useFakeTimers();
 
     class TestObserver {
       constructor(callback: IntersectionObserverCallback) {
@@ -57,35 +60,40 @@ describe("branchline enhancement", () => {
       observe = vi.fn();
     }
 
-    initializeBranchlineEnhancement(
-      root as never,
-      {
-        IntersectionObserver: TestObserver,
-      } as never,
-    );
-
-    links[1]!.triggerClick();
-    expect(links[0]!.dataset.active).toBe("false");
-    expect(links[1]!.dataset.active).toBe("true");
-    expect(links[1]!.setAttribute).toHaveBeenCalledWith(
-      "aria-current",
-      "location",
-    );
-
-    observerCallback?.(
-      [
+    try {
+      initializeBranchlineEnhancement(
+        root as never,
         {
-          isIntersecting: true,
-          intersectionRatio: 1,
-          target: sections[0],
-        } as IntersectionObserverEntry,
-      ],
-      {} as IntersectionObserver,
-    );
+          IntersectionObserver: TestObserver,
+        } as never,
+      );
 
-    expect(links[0]!.dataset.active).toBe("true");
-    expect(links[1]!.dataset.active).toBe("false");
-    expect(links[1]!.removeAttribute).toHaveBeenCalledWith("aria-current");
+      links[1]!.triggerClick();
+      expect(links[0]!.dataset.active).toBe("false");
+      expect(links[1]!.dataset.active).toBe("true");
+      expect(links[1]!.setAttribute).toHaveBeenCalledWith(
+        "aria-current",
+        "location",
+      );
+
+      vi.advanceTimersByTime(1001);
+      observerCallback?.(
+        [
+          {
+            isIntersecting: true,
+            intersectionRatio: 1,
+            target: sections[0],
+          } as IntersectionObserverEntry,
+        ],
+        {} as IntersectionObserver,
+      );
+
+      expect(links[0]!.dataset.active).toBe("true");
+      expect(links[1]!.dataset.active).toBe("false");
+      expect(links[1]!.removeAttribute).toHaveBeenCalledWith("aria-current");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("keeps click synchronization when IntersectionObserver is unavailable", () => {
@@ -102,6 +110,33 @@ describe("branchline enhancement", () => {
 
     expect(links[1]!.dataset.active).toBe("true");
     expect(links[0]!.dataset.active).toBe("false");
+  });
+
+  it("does not move focus or control responsive disclosures after a click", () => {
+    const { links, root } = createRoot(["foundation", "motion"]);
+    const focus = vi.fn();
+    const disclosure = { open: true };
+    const nav = root.querySelector() as unknown as {
+      querySelector: ReturnType<typeof vi.fn>;
+    };
+
+    nav.querySelector.mockImplementation((selector: string) => {
+      if (selector === ".branchline-nav__disclosure") return disclosure;
+      if (selector === "summary") return { focus };
+      return null;
+    });
+
+    initializeBranchlineEnhancement(
+      root as never,
+      {
+        IntersectionObserver: undefined,
+        matchMedia: () => ({ matches: true }),
+      } as never,
+    );
+    links[1]!.triggerClick();
+
+    expect(disclosure.open).toBe(true);
+    expect(focus).not.toHaveBeenCalled();
   });
 
   it("does nothing when the navigation root is absent", () => {

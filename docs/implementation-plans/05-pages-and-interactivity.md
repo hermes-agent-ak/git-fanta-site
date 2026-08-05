@@ -3,9 +3,9 @@ status: in_progress
 phase: 5
 execution_order: next
 plan_created_at: 2026-08-04
-plan_reviewed_at: 2026-08-04
+plan_reviewed_at: 2026-08-05
 plan_review_status: complete
-plan_review_method: manual-equivalent-fallback
+plan_review_method: plan-review
 depends_on:
   - docs/implementation-plans/00-project-bootstrap.md
   - docs/implementation-plans/01-design-system-and-layout.md
@@ -47,7 +47,10 @@ including keyboard, screen-reader, zoom/reflow, contrast, reduced-motion,
 touch, and error-state behavior. This plan is an engineering target and does
 not make a legal conformance or applicability claim for either EU directive.
 
-## Current-state findings
+## Initial current-state findings
+
+The following findings describe the Phase 4 head from which Phase 5 began. The
+implementation progress section records what is already present now.
 
 - `src/pages/index.astro` is explicitly temporary. It renders five Phase 2
   experience sections and only exposes the Phase 4 version as a Handoff marker;
@@ -86,6 +89,34 @@ not make a legal conformance or applicability claim for either EU directive.
   source evidence. Its `README.md` and `docs/git-fanta-dag.rst` support product
   and installation copy; unsupported marketing claims remain out of scope.
 
+### Responsive-navigation corrections found during visual review
+
+- The implemented SiteHeader renders all six primary links at every width. At
+  320 CSS pixels it wraps into two short rows instead of providing the expected
+  conventional global hamburger navigation.
+- The uncommitted mobile Branchline follow-up turns local page orientation into
+  a second sticky disclosure. With JavaScript disabled it starts open as an
+  overlay, and its click handler moves focus back to the summary.
+- The 768 CSS-pixel breakpoint switches to the six-column desktop Branchline too
+  early: every label truncates and anchor targets can land behind the 142px
+  sticky surface. Truncation remains at wider review widths.
+- The correction therefore assigns small-screen disclosure ownership to
+  SiteHeader, keeps Branchline fully visible and in-flow below 64rem, and makes
+  sticky ownership and anchor offsets explicit at every breakpoint.
+- Follow-up review found that the resulting two-by-three mobile route card is
+  visually too dominant before the hero. A fixed horizontal bottom bar would
+  incorrectly present six same-page anchors as primary app destinations and
+  permanently reduce the reading viewport. The local route is therefore
+  omitted below 64rem; the ordered headings remain the complete mobile path.
+- Keeping the desktop header static also allows scrolling text to appear in the
+  open space above the sticky Branchline. The final desktop contract keeps both
+  surfaces sticky and fills their complete gap with an opaque page-background
+  layer.
+- Final mobile review found that the inset primary-navigation card still reads
+  as a modal floating over the hero. The compact disclosure therefore becomes
+  a full-viewport-width, in-flow extension attached directly to the header row;
+  this shallow link set needs no scrim, drawer, dialog, or focus trap.
+
 ## Scope
 
 ### 1. Write the page-experience contract first
@@ -96,14 +127,55 @@ semantic HTML, keyboard behavior, screen-reader behavior, responsive behavior,
 reduced-motion behavior, no-JavaScript fallback, and a measurable performance
 budget.
 
-#### Branchline Navigation — orientation pattern
+#### Primary Navigation — global disclosure pattern
+
+- Keep `src/components/site/SiteHeader.astro` as the only global site
+  navigation on every route.
+- Below 64rem, render one compact sticky header row with the brand and a
+  conventional hamburger disclosure. Its ordinary links remain grouped as
+  internal site destinations followed by external project destinations, retain
+  `aria-current="page"`, and remain usable without JavaScript.
+- Use a native `<button>` with `aria-expanded` and `aria-controls` to disclose
+  normal navigation links; do not apply an ARIA `menu`/`menuitem` interaction
+  model to website navigation.
+- Make the disclosed surface span the viewport below 64rem and attach it flush
+  to the header row. It must expand the header in document flow rather than
+  overlay page content, while its inner padding follows the responsive page
+  gutter. Do not add a scrim, drawer, dialog semantics, body-scroll lock, or
+  focus trap for this shallow navigation.
+- Keep one link-group column on narrow phones, switch to two balanced columns
+  from 40rem through 63.99rem, and bound the panel height on short landscape
+  viewports so the links scroll without moving the close control off-screen.
+- Below 64rem, keep the footer identity but hide its duplicate primary-link
+  list. Preserve the footer navigation at and above 64rem, where it remains a
+  useful end-of-page route set without competing with the compact header.
+- Give the toggle and disclosed links at least 44 CSS-pixel targets. The panel
+  must close through its toggle and, when enhanced, Escape/outside activation,
+  without trapping focus or depending on motion.
+- At and above 64rem, show the complete inline primary navigation and keep the
+  header sticky at the viewport top with an opaque page background.
+
+#### Branchline Navigation — local orientation pattern
 
 - Reuse `src/components/visual/BranchlineNav.astro` and
   `src/lib/experience-sections.ts` for real homepage anchor navigation.
 - Map every item to a meaningful section with visible state and
   `aria-current="location"`; keep conceptual refs labelled as design metadata.
-- Keep desktop sticky/horizontal presentation and the small-screen native
-  `<details>` disclosure keyboard-operable. No scroll hijacking, canvas, or
+- Below 64rem, omit the local route surface. Do not replace it with a fixed
+  bottom bar or horizontally scrolling anchor rail; preserve the full reading
+  viewport and rely on the ordered section headings and document flow.
+- From 64rem through 79.99rem, use a sticky six-column route map with its intro
+  on a separate row. At and above 80rem, use the compact side-by-side sticky
+  presentation. Labels and conceptual refs must never truncate.
+- At and above 64rem, keep SiteHeader and Branchline sticky as one visual stack.
+  Fill the entire viewport-width gap between them with an opaque page-background
+  layer so page content cannot show through while scrolling.
+- Keep same-page anchors available without JavaScript wherever Branchline is
+  displayed. Active-state enhancement may update `aria-current`, node tone, and
+  visual state but must not move focus, scroll the page, open a panel, or close a
+  disclosure.
+- Use breakpoint-specific anchor offsets so the complete sticky stack never
+  obscures target section metadata or headings. No scroll hijacking, canvas, or
   JS-only navigation.
 - Keep heading/content order complete if the visual map is unavailable.
 
@@ -276,7 +348,11 @@ header slot, `#main-content`, footer slot, and landmark semantics.
 Modify `src/components/site/SiteHeader.astro` and `src/lib/navigation.ts` to add
 the internal Download route, preserve `aria-current="page"`, use `siteHref` for
 internal URLs, and keep explicit HTTPS external targets with
-`noopener noreferrer` for new tabs.
+`noopener noreferrer` for new tabs. The header owns the small-screen hamburger
+disclosure and is the only sticky navigation below 64rem. Keep the disclosure
+semantic and useful without JavaScript; use any enhancement only for Escape and
+outside-click dismissal. At and above 64rem, keep the inline header sticky and
+coordinate its height with the Branchline sticky offset.
 
 Create `public/favicon.svg` as an owned code-native favicon. Create
 `src/pages/robots.txt.ts` as a prerendered Astro endpoint so its sitemap URL is
@@ -306,8 +382,9 @@ Keep the layout usable at 320 CSS px, 200% zoom, 400% zoom/reflow, and text
 spacing overrides. Wrap refs, filenames, code samples, and release names; no
 critical horizontal overflow is allowed. Interactive controls must meet at
 least a 24 by 24 CSS-pixel target where WCAG exceptions do not apply, with 44
-CSS pixels preferred for primary actions. Native details/radio controls must
-work with keyboard, touch, and assistive technology.
+CSS pixels preferred for primary actions and required for the mobile navigation
+toggle and disclosed navigation links. Native details/radio controls must work
+with keyboard, touch, and assistive technology.
 
 Reduced-motion users receive the final static content immediately. No action
 depends on animation completion. Review forced-colors/high-contrast behavior
@@ -418,6 +495,8 @@ the finished pages but is not needed to define their semantic contracts. Phase
 - `src/components/site/SiteHeader.astro` — internal Download route/current state.
 - `src/components/site/SiteFooter.astro` — final product/download/recovery links.
 - `src/components/visual/BranchlineNav.astro` — final section labels/semantics.
+- `src/components/visual/branchline-enhancement.ts` — active state only; no
+  responsive disclosure or focus movement.
 - `src/lib/experience-sections.ts` — align visual map with final sections.
 - `src/lib/navigation.ts` — internal Download item.
 - `src/styles/global.css` — bounded page, download, responsive, and fallback CSS.
@@ -429,6 +508,9 @@ the finished pages but is not needed to define their semantic contracts. Phase
 - `pnpm-lock.yaml` — locked sitemap dependency.
 - `tests/e2e/visual-experience.spec.ts` — update only changed final-page
   assertions.
+- `tests/e2e/design-foundation.spec.ts` — global mobile disclosure behavior.
+- `tests/unit/branchline-enhancement.test.ts` — active-state synchronization
+  without responsive UI ownership.
 - `tests/e2e/content-assets.spec.ts` — derived-showcase assertion if consumed.
 - `README.md` — final routes/build note if needed.
 
@@ -525,6 +607,7 @@ existing Branchline/Git Tree IDs or document every intentional migration.
 ### Step 2 — Metadata, shell, and navigation
 
 Implement and test `metadata.ts`; extend BaseLayout; add Download navigation;
+give SiteHeader the small-screen global disclosure and inline desktop state;
 add sitemap, robots, favicon, and owned social asset if selected; verify both
 `BASE_PATH=/git-fanta-site/` and `BASE_PATH=/` outputs before page composition.
 
@@ -532,7 +615,8 @@ add sitemap, robots, favicon, and owned social asset if selected; verify both
 
 Implement focused Astro sections, replace the temporary index, feed the final
 section map into Branchline/Git Tree, consume the labelled derived showcase,
-and verify 320/768/1440 layouts before visual polish.
+and implement the non-sticky small-screen route index plus sticky desktop route
+map. Verify 320/375/640/768/1024/1280/1440 layouts before visual polish.
 
 ### Step 4 — Download view model/page
 
@@ -556,10 +640,11 @@ and meaningful missing-asset/metadata/JavaScript-disabled fallbacks.
 ### Step 7 — Acceptance review
 
 Run checks sequentially. Use keyboard-only navigation on all routes, review
-screen-reader names, 200% zoom/reflow, 320/768/1440 widths, reduced motion,
-contrast, landmarks, headings, link targets, focus behavior, generated HTML,
-raw API/token leakage, JSON-LD, and project-base URLs. Update this plan with
-head, files, evidence, limitations, and status only after all required checks.
+screen-reader names, 200% zoom/reflow,
+320/375/640/768/1024/1280/1440 widths, reduced motion, contrast, landmarks,
+headings, link targets, focus behavior, generated HTML, raw API/token leakage,
+JSON-LD, and project-base URLs. Update this plan with head, files, evidence,
+limitations, and status only after all required checks.
 
 ## Commands
 
@@ -576,6 +661,7 @@ GITHUB_API_MODE=fixture pnpm build
 GITHUB_API_MODE=fixture pnpm exec playwright test tests/e2e/pages.spec.ts
 GITHUB_API_MODE=fixture pnpm exec playwright test tests/e2e/downloads.spec.ts
 GITHUB_API_MODE=fixture pnpm exec playwright test tests/e2e/metadata.spec.ts
+GITHUB_API_MODE=fixture pnpm exec playwright test tests/e2e/design-foundation.spec.ts tests/e2e/visual-experience.spec.ts
 GITHUB_API_MODE=fixture pnpm test:a11y
 GITHUB_API_MODE=live pnpm build
 pnpm format:check
@@ -608,6 +694,14 @@ Phase 6 work.
   against the same `dist/` directory.
 - Assert homepage order/actions, derived-showcase wording, release handoff,
   current navigation, and 404 recovery.
+- Assert the full-width, header-attached mobile/tablet global disclosure pushes
+  content instead of overlaying it, alongside the omitted compact Branchline,
+  desktop inline navigation, opaque two-surface desktop sticky stack, complete
+  desktop local-route labels/refs, 44px mobile targets, and no initial
+  no-JavaScript Branchline overlay.
+- After each Branchline anchor activation, assert the target metadata and heading
+  begin below the active sticky surface and focus is not moved to another
+  control.
 - Assert recognized fixture links, manual selection, warnings, checksum guidance,
   complete-release link, and no automatic download/navigation.
 - Run a dedicated Playwright context with `javaScriptEnabled: false` and assert
@@ -622,8 +716,9 @@ Phase 6 work.
   selector, disclosures, direct links, and footer; verify no focus theft.
 - Review screen-reader names/announcements for selected, unavailable, warning,
   checksum, and external-link states.
-- Review 320/768/1440 CSS px, 200% and 400% zoom/reflow, text-spacing
-  overrides, reduced motion, and forced-colors/high contrast where supported.
+- Review 320/375/640/768/1024/1280/1440 CSS px, 200% and 400% zoom/reflow,
+  text-spacing overrides, reduced motion, and forced-colors/high contrast where
+  supported.
 
 ### Output and security inspection
 
@@ -647,13 +742,28 @@ in the working tree and remains reviewable before commit:
 - responsive/reduced-motion/forced-colors styles, explicit missing and
   unsupported asset states, no-JavaScript release-link fallback, and updated
   unit and Playwright coverage.
+- all responsive-navigation corrections are implemented: compact layouts omit
+  Branchline, the mobile disclosure is a full-width in-flow extension of the
+  header, and desktop SiteHeader and Branchline form one opaque sticky stack.
 
 Completed verification so far: `pnpm check`, `pnpm test:unit`, fixture build,
 the dedicated pages/downloads/metadata E2E suites, the full fixture E2E suite,
 `pnpm test:a11y`, `pnpm format:check`, targeted documentation formatting,
 `pnpm lint`, `git diff --check`, root and deployment base-path builds, live
-build, and generated-output inspection. Manual visual review and the final
-staged commit review remain before this plan can be marked complete.
+build, and generated-output inspection. The 2026-08-05 navigation correction
+was additionally reviewed at 320/375/640/768/1024/1280/1440 CSS pixels and
+verified with 56 unit tests, 32 fixture E2E tests, four dedicated Axe tests,
+mobile open/closed and no-JavaScript states, reduced motion, forced colors,
+anchor geometry, and horizontal-overflow checks. The follow-up additionally
+confirmed zero horizontal overflow and opaque stack geometry in live browser
+renders at 320, 768, 1024, and 1440 CSS pixels. The responsive-navigation staged
+diff passed final review; broader Phase 5 acceptance remains before this plan can
+be marked complete. The final attached-panel follow-up passed visual review at
+320/375/640/768/1024/1280/1440 CSS pixels and also verified that opening the
+sticky header after scrolling pushes content instead of covering the reading
+position. Compact footer review additionally removed the duplicate link list
+below 64rem while retaining the product identity and complete desktop footer
+navigation.
 
 ## Acceptance criteria
 
@@ -685,11 +795,24 @@ staged commit review remain before this plan can be marked complete.
       guidance is visible.
 - [ ] Only `DownloadSelector.tsx` is hydrated React; all other content is static
       Astro and useful without JavaScript.
+- [x] Below 64rem, SiteHeader is the only navigation surface and exposes a
+      conventional 44px hamburger disclosure; Branchline is omitted rather than
+      repurposed as a fixed or horizontally scrolling bottom bar.
+- [x] Below 64rem, the disclosed primary navigation spans the viewport, attaches
+      directly to the header row, and pushes page content instead of overlaying
+      it; it introduces no modal or drawer behavior.
+- [x] Below 64rem, the footer retains its product identity without repeating the
+      primary-link list; at and above 64rem all footer links remain available.
+- [x] At and above 64rem, SiteHeader and Branchline form an opaque sticky stack;
+      content never appears between them while scrolling.
+- [x] Desktop Branchline labels and conceptual refs remain fully visible;
+      same-page navigation never moves focus and the complete sticky stack does
+      not obscure section metadata or headings.
 - [ ] Canonical, title, description, OG, social image, favicon, robots, sitemap,
       and conservative SoftwareApplication JSON-LD are base-path-safe.
-- [ ] Pages work at 320/768/1440 CSS px, 200% and 400% zoom/reflow, and text
-      spacing overrides without critical overflow; controls meet the documented
-      target-size contract.
+- [ ] Pages work at 320/375/640/768/1024/1280/1440 CSS px, 200% and 400%
+      zoom/reflow, and text spacing overrides without critical overflow;
+      controls meet the documented target-size contract.
 - [ ] Keyboard, focus, names, landmarks, headings, contrast, native controls,
       reduced motion, and non-color states pass review and Axe.
 - [ ] Missing release/assets, JS disabled, unsupported platform, media failure,
@@ -716,6 +839,10 @@ staged commit review remain before this plan can be marked complete.
 | OS cannot be determined                    | Manual platform selection and all available links remain visible.    |
 | Selection changes                          | Update text/action without focus movement or download.               |
 | Reduced motion enabled                     | Show final static graph/content immediately.                         |
+| Mobile global navigation opens             | Expand a full-width header surface in flow; no modal/menu role.      |
+| JavaScript is unavailable on the homepage  | Header links and desktop local-route links remain operable.          |
+| Branchline anchor is activated             | Preserve focus and reveal target metadata/heading below sticky UI.   |
+| Breakpoint boundary is crossed             | Omit compact Branchline or form the opaque desktop sticky stack.     |
 | 320px/reflow overflows                     | Wrap/reflow refs, filenames, and controls before acceptance.         |
 | Project-base URL breaks                    | Resolve through `siteHref`/configured site.                          |
 | JSON-LD malformed/unsupported              | Omit field or fail metadata test; never mislead.                     |
@@ -759,10 +886,9 @@ head, changed files, test evidence, known limitations, and the Phase 6 handoff.
 
 ## Review decision
 
-This plan is ready for implementation after a sequential manual-equivalent
-review on 2026-08-04. The advertised `plan-review` skill was unavailable at
-its configured source path, so the review followed the required plan-review
-checks directly:
+This plan remains ready for implementation after its responsive-navigation
+correction was reviewed against the repository and rendered UI on 2026-08-05
+with the `plan-review` workflow:
 
 - every existing file reference and dependency path was checked against the
   current checkout;
@@ -770,6 +896,10 @@ checks directly:
 - existing Branchline, Git Tree, `ExperienceSection`, `siteHref`, BaseLayout,
   Phase 4 loader, fixture/live build split, and Playwright base URL contracts
   were inspected before the plan was finalized;
+- SiteHeader now owns the planned global mobile/tablet disclosure, while
+  Branchline keeps only local same-page orientation and active-state behavior;
+- the breakpoint contract prevents stacked sticky navigation, the 768px layout
+  cliff, label/ref truncation, and anchor targets hidden behind sticky UI;
 - the `HomeSection` contract was aligned with the existing `ExperienceSection`
   fields so `BranchlineNav.astro` can consume it without a lossy adapter;
 - missing release assets now have explicit nullable fields and availability
@@ -781,10 +911,14 @@ checks directly:
 
 The Phase 5 scope is executable after the current Phase 4 head. Phase 6 owns
 the final quality/security/performance gate and Phase 8 remains correctly
-deferred. No implementation, commit, or push is authorized by this document.
+deferred. The responsive-navigation follow-up passed its staged review; pushing
+remains subject to explicit user authorization.
 
 ## References and legal scope note
 
+- [W3C APG — Disclosure Navigation Menu Example](https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation/)
+- [GOV.UK Design System — Service navigation](https://design-system.service.gov.uk/components/service-navigation/)
+- [U.S. Web Design System — Header](https://designsystem.digital.gov/components/header/)
 - [Directive (EU) 2019/882 — European Accessibility Act](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32019L0882)
 - [Directive (EU) 2016/2102 — web and mobile accessibility](https://eur-lex.europa.eu/eli/dir/2016/2102/oj/eng)
 - [ETSI accessibility resources](https://www.etsi.org/accessibility/)
