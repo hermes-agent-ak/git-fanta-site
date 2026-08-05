@@ -25,6 +25,16 @@ const brandLogoHref = siteHref(
   brandLogo.targetPath.replace(/^public/, ""),
   baseUrl,
 );
+const navigationGroups = [
+  {
+    label: "Site",
+    items: navigationItems.filter((item) => !item.external),
+  },
+  {
+    label: "Project links",
+    items: navigationItems.filter((item) => item.external),
+  },
+] as const;
 
 function normalizedPath(path: string): string {
   const withoutHash = path.split("#", 1)[0] ?? "/";
@@ -44,9 +54,12 @@ function isCurrent(item: NavigationItem): boolean {
 }
 ---
 
-<header class="border-b border-border-normal bg-bg-page">
+<header
+  class="site-header border-b border-border-normal bg-bg-page"
+  data-site-header
+>
   <Container size="xl">
-    <div class="flex flex-wrap items-center justify-between gap-4 py-5">
+    <div class="site-header__shell">
       <a
         class="brand-link inline-flex items-center gap-3 rounded-sm text-lg font-extrabold tracking-tight text-fg-primary no-underline hover:text-accent-orange"
         href={siteHref("/", baseUrl)}
@@ -61,27 +74,127 @@ function isCurrent(item: NavigationItem): boolean {
         />
         <span>{product.name}</span>
       </a>
-      <nav aria-label="Primary">
-        <ul
-          class="m-0 flex flex-wrap items-center justify-end gap-x-4 gap-y-2 p-0 text-sm font-medium text-fg-muted"
+      <button
+        class="site-header__toggle"
+        type="button"
+        aria-label="Open primary navigation"
+        aria-expanded="false"
+        aria-controls="primary-navigation"
+        data-site-nav-toggle
+        hidden
+      >
+        <span
+          class="site-header__toggle-icon"
+          data-motion="navigation-toggle"
+          aria-hidden="true"
         >
-          {
-            navigationItems.map((item) => (
-              <li>
-                <a
-                  class="rounded-sm px-1 py-1 hover:text-accent-orange"
-                  href={navigationHref(item, baseUrl)}
-                  aria-current={isCurrent(item) ? "page" : undefined}
-                  target={item.external ? "_blank" : undefined}
-                  rel={item.external ? "noopener noreferrer" : undefined}
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </button>
+      <nav
+        id="primary-navigation"
+        class="site-header__nav"
+        aria-label="Primary"
+        data-site-nav-panel
+      >
+        {
+          navigationGroups.map((group) => (
+            <div class="site-header__nav-group">
+              <p class="site-header__nav-label">{group.label}</p>
+              <ul class="site-header__nav-list">
+                {group.items.map((item) => (
+                  <li>
+                    <a
+                      class="site-header__nav-link"
+                      href={navigationHref(item, baseUrl)}
+                      aria-current={isCurrent(item) ? "page" : undefined}
+                      target={item.external ? "_blank" : undefined}
+                      rel={item.external ? "noopener noreferrer" : undefined}
+                    >
+                      <span>{item.label}</span>
+                      {item.external ? (
+                        <span
+                          class="site-header__external-icon"
+                          aria-hidden="true"
+                        >
+                          ↗
+                        </span>
+                      ) : null}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
       </nav>
     </div>
   </Container>
 </header>
+
+<script is:inline>
+  const mobileNavigation = window.matchMedia("(max-width: 63.99rem)");
+
+  document.querySelectorAll("[data-site-header]").forEach((header) => {
+    const toggle = header.querySelector("[data-site-nav-toggle]");
+    const panel = header.querySelector("[data-site-nav-panel]");
+
+    if (
+      !(header instanceof HTMLElement) ||
+      !(toggle instanceof HTMLButtonElement) ||
+      !(panel instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    const setOpen = (open) => {
+      header.dataset.siteNavState = open ? "open" : "closed";
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.setAttribute(
+        "aria-label",
+        open ? "Close primary navigation" : "Open primary navigation",
+      );
+    };
+
+    const synchronizeLayout = () => {
+      if (mobileNavigation.matches) {
+        setOpen(false);
+        return;
+      }
+
+      delete header.dataset.siteNavState;
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-label", "Open primary navigation");
+    };
+
+    toggle.hidden = false;
+    synchronizeLayout();
+
+    toggle.addEventListener("click", () => {
+      setOpen(toggle.getAttribute("aria-expanded") !== "true");
+    });
+
+    document.addEventListener("pointerdown", (event) => {
+      if (
+        header.dataset.siteNavState === "open" &&
+        event.target instanceof Node &&
+        !header.contains(event.target)
+      ) {
+        setOpen(false);
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || header.dataset.siteNavState !== "open") {
+        return;
+      }
+
+      setOpen(false);
+      toggle.focus();
+    });
+
+    mobileNavigation.addEventListener("change", synchronizeLayout);
+  });
+</script>

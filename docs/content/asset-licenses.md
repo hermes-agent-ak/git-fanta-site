@@ -44,6 +44,9 @@ media.
 - Important boundary: this is derived project showcase media. It is not an
   independent assertion that `media/screenshot.webp` is an authentic Git Fanta
   application capture.
+- Current presentation: the website exposes only the redacted interface region;
+  the composite logo and orange decorative frame remain outside the visible
+  viewport.
 - Accessibility: planned consumers must provide descriptive alternative text
   that identifies it as a derived showcase, not as verified product UI.
 

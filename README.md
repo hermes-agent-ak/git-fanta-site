@@ -4,10 +4,10 @@ The official website for [Git Fanta](https://github.com/hermes-agent-ak/git-fant
 
 This repository is intentionally separate from the Python/Qt application repository. It contains the website, its static-build tooling, its tests, and its deployment configuration.
 
-The project is in the bootstrap stage. Phase 0 now provides the Node/pnpm toolchain, static Astro
-shell, base-path-safe URL helper, baseline CI and layered unit/build/E2E accessibility checks. The
-architectural source of truth is the [Master Planning and Implementation Brief](docs/master-planning-and-implementation-brief.md),
-and the bootstrap decisions are recorded in the [Phase 0 plan](docs/implementation-plans/00-project-bootstrap.md).
+Phases 0–3 and the promoted GitHub Pages deployment are complete. The current
+branch completes the Phase 4 release-data boundary; final page composition and
+the download experience remain in Phase 5. The architectural source of truth is
+the [Master Planning and Implementation Brief](docs/master-planning-and-implementation-brief.md).
 
 ## Why this architecture
 
@@ -64,6 +64,20 @@ I chose native `fetch` instead of adding an API client dependency because this i
 An optional non-public GitHub token may increase the build rate limit. It must never be exposed through a `PUBLIC_` variable or client-side JavaScript. `GITHUB_API_MODE=fixture` will provide deterministic offline development and tests.
 
 Production builds will fail clearly when GitHub release data cannot be fetched. They will not silently substitute stale fixture data, because publishing an old download link is more dangerous than failing a deployment before it replaces the previously deployed site.
+
+Build mode is controlled explicitly with `GITHUB_API_MODE`. It defaults to
+`live`, which fetches the latest published release from GitHub. Set an optional
+build-only `GITHUB_TOKEN` to increase the API rate limit; never use a
+`PUBLIC_` variable for this token. Deterministic offline builds and tests use:
+
+```bash
+GITHUB_API_MODE=fixture pnpm build
+GITHUB_API_MODE=fixture pnpm test:e2e
+```
+
+The Pages workflow sets `GITHUB_API_MODE=live`. A failed live request or invalid
+release response fails the build, so the previous Pages deployment remains
+untouched.
 
 ### GitHub Pages hosting
 

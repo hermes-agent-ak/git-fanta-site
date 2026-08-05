@@ -254,6 +254,22 @@ clarity of the implementation—not through novelty claims or opaque generated
 markup. Every distinctive visual pattern must have a name, a reusable contract,
 an accessibility behavior, a performance budget, and a documented fallback.
 
+The intended quality bar is clean, award-level product design: deliberate
+hierarchy, confident typography, disciplined spacing, precise microcopy,
+responsive composition, and interactions that feel impressive because they
+serve a clear product purpose. The site is a discreet showroom for demonstrating
+strong AI-assisted UI/UX work. It may include memorable, boast-worthy details,
+but every such detail must improve orientation, trust, product understanding, or
+download confidence. Novelty-only decoration, fake product capability, and
+interaction friction are not acceptable showroom features.
+
+Phase 5 therefore requires intensive experience planning before implementation.
+For each distinctive page pattern, the plan must define its user purpose,
+content and state model, semantic HTML, keyboard behavior, screen-reader
+behavior, reduced-motion behavior, no-JavaScript fallback, responsive behavior,
+and a bounded performance budget. The implementation must be reviewable as a
+coherent system rather than as a collection of isolated visual effects.
+
 The visual language should treat Git as a design grammar:
 
 * a branchline is the primary visual route through the homepage;
@@ -297,6 +313,20 @@ The design review bar is intentionally high: the implementation must be
 cohesive at 320, 768, and 1440 CSS pixels, communicate hierarchy without motion,
 feel recognizably Git Fanta rather than generic SaaS, and pass keyboard, Axe,
 reduced-motion, and performance checks before content work builds on it.
+
+Accessibility is a first-order product and showroom requirement. Target WCAG
+2.2 Level AA, and use EN 301 549-informed practices where the web experience is
+covered by the relevant accessibility requirements. Design and test the pages
+for keyboard and screen-reader use, zoom and reflow, text spacing, high
+contrast/forced-colors conditions where practical, reduced motion, touch input,
+error states, disabled states, and download uncertainty. Do not make a legal
+conformance claim without a separate applicability and accessibility audit.
+The [European Accessibility Act, Directive (EU) 2019/882](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32019L0882)
+and the [Web Accessibility Directive, Directive (EU) 2016/2102](https://eur-lex.europa.eu/eli/dir/2016/2102/oj/eng)
+are treated as EU-oriented engineering context, not as an assumption that this
+private project website automatically falls within either directive. The
+[ETSI accessibility resources](https://www.etsi.org/accessibility/) provide the
+relevant standards context.
 
 The visual research baseline is focused rather than prescriptive. Awwwards
 references show useful patterns in menu/loading choreography, scroll animation,
@@ -790,6 +820,11 @@ or cross-repository release triggering are implemented. The numbered phases
 remain unchanged; this is an execution-order decision. Phase 7 depends only on
 the static Astro foundation and the current Phase 3 content/assets.
 
+Phase 7 is complete and live. Phase 4 — release data — is implemented and
+verified on `feature/phase-4-github-release-integration`; Phase 5 is now in
+implementation on `feature/phase-5-pages-and-interactivity`. Phases 6 and 8
+remain behind it in the reviewed execution order.
+
 ### Phase 0 — Bootstrap
 
 Create the Astro repository, Node and pnpm configuration, strict TypeScript setup, Tailwind 4 Vite integration, React integration, directory structure and basic scripts.
@@ -828,12 +863,14 @@ Build the homepage, download page, 404 page, metadata, structured data and the m
 
 Add ESLint, Prettier, Vitest, Playwright, Axe, performance checks, Dependabot and dependency review.
 
-### Phase 7 — Deployment (promoted next)
+### Phase 7 — Deployment (complete)
 
-Add GitHub Pages configuration and deployment workflow. Verify project-subpath
-routing and static assets. Execute this phase immediately after Phase 3 so the
-current page can be deployed as a visible milestone; it must not wait for the
-later release-data, final-pages, or cross-repository integration phases.
+GitHub Pages configuration and deployment workflow are implemented and merged
+after Phase 3. The production run succeeded on `main`, project-subpath routing
+and static assets were verified, and the site is live at
+`https://hermes-agent-ak.github.io/git-fanta-site/`. The deployment remains
+independent from final page composition and cross-repository integration. Phase
+4 now extends its build step with independently fetched, validated release data.
 
 ### Phase 8 — Repository integration
 
@@ -853,14 +890,29 @@ Update the Git Fanta release workflow to dispatch a website rebuild after a rele
   owner-requested derived showcase are documented in the Phase 3 plan and
   asset ledger. The website brand uses the project-owner supplied vectorized
   SVG derived from the supplied PNG rather than the older application SVG.
-- Phase 7 — GitHub Pages deployment: promoted as the next implementation phase.
-  The current repository has no deployment workflow yet; the existing static
-  page, base-path-safe Astro configuration, CI, and verified Phase 3 assets are
-  the implementation inputs for the promoted deployment slice.
-- Phases 4–6 and 8 remain planned and are deferred until the independent site
-  deployment is working. Phase 8 must remain after deployment because it
-  extends the application release workflow only after the website has a live
-  destination.
+- Phase 7 — GitHub Pages deployment: complete and live from `main`. The
+  successful production run is recorded in the Phase 7 plan and the live URL
+  is `https://hermes-agent-ak.github.io/git-fanta-site/`.
+- Phase 4 — release data: complete on
+  `feature/phase-4-github-release-integration` at commit `9400a92`. Native
+  GitHub fetching, Zod validation, normalized release data, asset
+  classification, fixture mode, the Handoff marker, and live/fixture workflow
+  contracts are implemented and verified.
+- Phase 5 — pages and interactivity: in implementation on
+  `feature/phase-5-pages-and-interactivity`. It consumes the normalized release
+  model for the final homepage, download page, and download selector. Its
+  detailed plan is recorded in
+  `docs/implementation-plans/05-pages-and-interactivity.md`; the plan was
+  manually reviewed on 2026-08-04 after the configured review skill source was
+  unavailable. The current implementation passes type, unit, fixture E2E,
+  Axe, lint, formatting, base-path, live-build, and local SonarQube Quality
+  Gate verification. Its responsive-navigation, accessible download-selector,
+  and deterministic desktop route-tracking follow-ups are committed and pushed
+  at `517cb71`; Phase 5 remains in implementation until the remaining
+  acceptance criteria are closed.
+- Phases 6 and 8 remain planned after Phase 5. Phase 8 must remain after
+  deployment because it extends the application release workflow only after
+  the website has a live destination.
 
 ## 20. Codex operating instructions
 

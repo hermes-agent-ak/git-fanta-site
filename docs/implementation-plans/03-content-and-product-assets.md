@@ -261,7 +261,7 @@ gate and update the content decision before proceeding.
 
 ### Review decision
 
-The plan is ready for implementation on
+The plan was ready for implementation on
 `feature/phase-3-content-and-product-assets`. The review found no missing
 Phase 1/2 dependency or duplicate content/asset abstraction. The first
 implementation slice is consequently limited to the source-backed content

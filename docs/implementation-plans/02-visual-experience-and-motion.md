@@ -64,26 +64,29 @@ pretend to be live repository data or replace ordinary content navigation.
 
 ## Implemented result
 
-- `experienceSections` is the single readonly source for five conceptual
+- `experienceSections` is the single readonly source for six conceptual
   anchors, refs, node kinds, tones, and accessible labels.
 - `BranchlineNav.astro` renders ordinary anchors with a validated server-side
   fallback. The active state is owned by `data-active`; `aria-current` mirrors
   it, and CSS consumes the same attribute.
-- `branchline-enhancement.ts` adds click synchronization and one bounded
-  `IntersectionObserver` for normal scrolling. It is 1,398 source bytes and
-  never replaces native navigation. Its state transitions are covered through
-  an injected root/view contract, while browser wiring remains covered by
+- `branchline-enhancement.ts` adds click synchronization and a passive,
+  frame-coalesced scrollspy. It selects the last section to cross the
+  sticky-stack activation line, so active state cannot reverse when sections
+  have different heights. It remains below the 4 KiB source budget and never
+  replaces native navigation. Its state transitions are covered through an
+  injected root/view contract, while browser wiring remains covered by
   Playwright.
 - `GitTreeReveal.astro` and `CommitMarker.astro` remain decorative and have no
   independent navigation-active state.
 - The decision log documents state ownership, rejected alternatives, and the
   performance/accessibility translation of the focused reference research.
-- The implementation passes 14 unit tests, 13 browser tests, 3 Axe-tagged
-  tests, formatting, lint, type-check, build, and diff validation. The
+- The current Phase 5 follow-up passes 58 unit tests, the visual browser suite
+  including ordered desktop-scroll regression at 1024px and 1440px, formatting,
+  lint, type-check, build, and diff validation. The
   SonarQube workflow generates and imports LCOV coverage before analysis;
   declarative Astro/CSS repetition is excluded from copy-paste detection while
-  TypeScript source remains measured. The local coverage run reports 96.13%
-  line coverage.
+  TypeScript source remains measured. The current local coverage run reports
+  86.23% overall line coverage and 96.84% for the Branchline enhancement.
 
 ## Scope
 
@@ -137,14 +140,15 @@ model and provides:
 - a visible active node and an exact accessible navigation label;
 - `aria-current="location"` or `aria-current="page"` on the active section;
 - a desktop rail or branch map that does not cover content or trap focus;
-- a mobile disclosure or stacked anchor list that works without JavaScript;
+- compact layouts that omit the local route in favour of the complete ordered
+  document flow and the global header navigation;
 - an explicit focus state for every node and connector-adjacent control; and
 - a normal browser scroll path with no wheel hijacking, forced snap, or hidden
   content.
 
-If active-section enhancement needs JavaScript, use one small
-`IntersectionObserver` module rather than a scroll event loop. The page must
-retain complete anchor navigation and a sensible first-node state when the
+If active-section enhancement needs JavaScript, use one small passive,
+frame-coalesced scrollspy rather than an unbounded scroll event loop. The page
+must retain complete anchor navigation and a sensible first-node state when the
 script is unavailable.
 
 ### 4. Implement the Git Tree visual system
@@ -203,12 +207,14 @@ The visual experience must be CSS-first and lightweight:
 - add no dependency for animation, smooth scrolling, graph rendering, or
   interaction choreography;
 - add no runtime JavaScript for decorative motion;
-- keep any progressive active-section module below 3072 source bytes and make it
+- keep any progressive active-section module below 4096 source bytes and make it
   optional; static anchors remain the source of truth;
 - ship no remote fonts, video, analytics, WebGL, canvas, or large background
   image for this phase;
 - avoid forced synchronous layout, continuous `requestAnimationFrame`, and
-  document-level pointer or scroll handlers;
+  non-passive or unbounded document-level event processing; the active-section
+  module may use passive scroll and user-intent listeners when updates are
+  frame-coalesced;
 - use `content-visibility: auto` only where intrinsic sizing and accessibility
   behavior are verified; and
 - preserve static HTML and first contentful paint when all motion styles are
@@ -280,11 +286,11 @@ logo, release data, or unsupported product claim.
 - `src/components/visual/CommitMarker.astro` — semantic-looking visual marker
   with an explicit decorative/accessibility contract.
 - `src/components/visual/branchline-enhancement.ts` — bounded active-section
-  observer enhancement that keeps the visual marker synchronized after clicks
-  and during normal scrolling.
+  scrollspy that keeps the visual marker synchronized after clicks and during
+  normal scrolling.
 - `tests/unit/experience-sections.test.ts` — section model and ref policy tests.
 - `tests/unit/branchline-enhancement.test.ts` — injected DOM/view state tests
-  for click and observer synchronization.
+  for click, scroll, interruption, and document-end synchronization.
 - `tests/e2e/visual-experience.spec.ts` — browser, keyboard, responsive, motion,
   fallback, and accessibility coverage.
 
@@ -338,8 +344,11 @@ Rules:
 
 ```ts
 type MotionIntent = {
-  readonly name: "commit-resolve" | "branch-trace" | "diff-reveal" | "ref-transition";
-  readonly properties: readonly ("transform" | "opacity" | "color" | "stroke-dashoffset")[];
+  readonly name:
+    "commit-resolve" | "branch-trace" | "diff-reveal" | "ref-transition";
+  readonly properties: readonly (
+    "transform" | "opacity" | "color" | "stroke-dashoffset"
+  )[];
   readonly reducedMotion: "static" | "fade";
   readonly maxDurationMs: number;
 };
@@ -391,8 +400,8 @@ automated reduced-motion assertion.
    `getByRole("navigation", { name: "Branchline" })` assertion must fail with
    `Expected: 1` and `Received: 0`.
 2. GREEN: implement `BranchlineNav.astro` with ordinary anchors and the small
-   IntersectionObserver progressive enhancement. Keep the anchors as the source
-   of truth when the script is unavailable.
+   passive scrollspy enhancement. Keep the anchors as the source of truth when
+   the script is unavailable.
 3. Verify keyboard navigation without JavaScript and verify that focus rings do
    not clip against the branch rail.
 
@@ -470,7 +479,7 @@ Run commands from the repository root on the Phase 2 branch.
 
 The implemented active-section module must remain within its source budget:
 
-    test "$(wc -c < src/components/visual/branchline-enhancement.ts)" -le 3072
+    test "$(wc -c < src/components/visual/branchline-enhancement.ts)" -le 4096
 
 Do not add a global browser, scanner, animation library, or formatter
 dependency for this phase.
@@ -490,6 +499,8 @@ dependency for this phase.
 - Verify the exact navigation accessible name and anchor destinations.
 - Verify one active section state with `aria-current` and a visible non-color-only
   indicator.
+- Verify natural desktop scrolling advances exactly once through Hero, Showcase,
+  Features, Workflow, Download, and Open source at 1024px and 1440px.
 - Verify graph connectors and markers are decorative when adjacent text carries
   the meaning.
 - Verify the skip link, primary site navigation, Branchline navigation,
@@ -505,8 +516,8 @@ dependency for this phase.
 - Verify navigation names, heading structure, landmark count, target names,
   focus visibility, and `aria-current` behavior.
 - Verify decorative SVG/graph content is excluded from the accessibility tree.
-- Verify mobile disclosure controls are native, keyboard-operable, and do not
-  steal focus.
+- Verify compact layouts omit Branchline without losing the global navigation or
+  the ordered reading path.
 
 ### Performance and static-output tests
 
@@ -514,7 +525,7 @@ dependency for this phase.
   request is introduced by the visual phase.
 - Assert the visual layer has no client directive and no continuous scroll loop.
 - Inspect animation declarations and allow only the documented motion properties.
-- Verify the active-section module stays below 3072 source bytes. Native CSS
+- Verify the active-section module stays below 4096 source bytes. Native CSS
   anchors remain the fallback if the module is unavailable.
 - Verify the production output remains static and base-path-safe.
 - Defer the full Lighthouse >=95 gate to Phase 6 while preserving the
@@ -549,9 +560,10 @@ dependency for this phase.
   content, navigation, focus, and state information.
 - No scroll hijacking, canvas/WebGL, autoplay video, full animation library,
   remote font, or large visual dependency is introduced.
-- The active-section JavaScript uses one bounded observer rather than a
-  continuous scroll loop, stays below the documented 3072-byte source budget,
-  and cannot create a second visual active-state contract.
+- The active-section JavaScript uses one bounded, frame-coalesced scrollspy
+  rather than a continuous animation-frame or polling loop, stays below the
+  documented 4096-byte source budget, and cannot create a second visual
+  active-state contract.
 - The visual layer passes unit, browser, keyboard, Axe, reduced-motion, narrow
   viewport, static-output, and diff checks.
 - Phase 3 can add authentic product content and screenshots without replacing

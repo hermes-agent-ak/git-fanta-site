@@ -19,14 +19,16 @@
     "test": "pnpm test:unit && pnpm test:e2e",
     "test:unit": "vitest run",
     "test:unit:coverage": "vitest run --coverage",
-    "test:e2e": "pnpm build && playwright test",
-    "test:a11y": "pnpm build && playwright test --grep @a11y"
+    "test:e2e": "GITHUB_API_MODE=fixture pnpm build && GITHUB_API_MODE=fixture playwright test",
+    "test:a11y": "GITHUB_API_MODE=fixture pnpm build && GITHUB_API_MODE=fixture playwright test --grep @a11y"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.2",
+    "@astrojs/sitemap": "^3.7.3",
     "astro": "^7.1.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

@@ -1,0 +1,113 @@
+---
+import type { DownloadPageModel } from "../../lib/downloads";
+import DownloadSelector from "../download/DownloadSelector";
+import DownloadAssetLink from "../download/DownloadAssetLink.astro";
+import ReleaseSummary from "../download/ReleaseSummary.astro";
+import Container from "../ui/Container.astro";
+
+interface Props {
+  model: DownloadPageModel;
+}
+
+const { model } = Astro.props;
+const availableAssets = model.assets.filter(
+  (asset) => asset.availability === "available",
+);
+const unavailableAssets = model.assets.filter(
+  (asset) => asset.availability !== "available",
+);
+---
+
+<Container as="section" size="lg">
+  <div class="download-page page-experience">
+    <div class="download-page__intro">
+      <p class="eyebrow">Release / verified build output</p>
+      <h1 class="text-display-sm">Download Git Fanta</h1>
+      <p class="lede">
+        Choose the artifact that matches your setup. Manual selection always
+        stays available, and no download starts until you activate a link.
+      </p>
+    </div>
+
+    <ReleaseSummary model={model} />
+
+    <section
+      class="download-confidence"
+      aria-labelledby="download-confidence-heading"
+    >
+      <div>
+        <p class="eyebrow">Before you install</p>
+        <h2 id="download-confidence-heading">
+          A clear handoff, with the caveats included
+        </h2>
+      </div>
+      <div class="download-confidence__grid">
+        <p>
+          Windows and macOS builds may be unsigned. SmartScreen or Gatekeeper
+          can show a warning; verify the download against SHA256SUMS when it is
+          available.
+        </p>
+        <p>
+          Git Fanta installs alongside git-cola. It does not overwrite it and
+          shares no command, desktop, or configuration directory.
+        </p>
+      </div>
+    </section>
+
+    <section
+      class="download-choices"
+      aria-labelledby="download-choices-heading"
+    >
+      <div class="download-choices__heading">
+        <p class="eyebrow">Choose an artifact</p>
+        <h2 id="download-choices-heading">
+          The release, in the format you need
+        </h2>
+      </div>
+
+      <div class="download-selector-fallback" data-download-fallback>
+        <h3>Direct release links</h3>
+        <ul class="download-asset-list">
+          {
+            availableAssets.map((asset) => (
+              <li>
+                <DownloadAssetLink asset={asset} />
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <DownloadSelector assets={model.assets} client:visible />
+
+      {
+        unavailableAssets.length > 0 && (
+          <aside
+            class="download-unavailable"
+            aria-labelledby="download-unavailable-heading"
+          >
+            <h3 id="download-unavailable-heading">
+              Not published or not classified
+            </h3>
+            <ul>
+              {unavailableAssets.map((asset) => (
+                <li>
+                  <strong>
+                    {asset.platformLabel} — {asset.artifactLabel}
+                  </strong>
+                  <span>{asset.sizeLabel}</span>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        )
+      }
+
+      <p class="download-complete-release">
+        Need another file? <a href={model.completeReleaseUrl}
+          >Open the complete GitHub Release</a
+        >.
+      </p>
+    </section>
+  </div>
+</Container>

@@ -1,0 +1,49 @@
+---
+import type { FeatureContent } from "../../content/features";
+import type { LatestRelease } from "../../lib/releases/types";
+import { homeSections } from "../../lib/home-sections";
+import BranchlineNav from "../visual/BranchlineNav.astro";
+import GitTreeReveal from "../visual/GitTreeReveal.astro";
+import Container from "../ui/Container.astro";
+import HeroSection from "../sections/HeroSection.astro";
+import ProductShowcaseSection from "../sections/ProductShowcaseSection.astro";
+import FeatureGridSection from "../sections/FeatureGridSection.astro";
+import WorkflowPreviewSection from "../sections/WorkflowPreviewSection.astro";
+import DownloadSection from "../sections/DownloadSection.astro";
+import OpenSourceSection from "../sections/OpenSourceSection.astro";
+import type { AssetRecord } from "../../content/assets";
+import type { ProductContent } from "../../content/product";
+
+interface Props {
+  product: ProductContent;
+  features: readonly FeatureContent[];
+  latestRelease: LatestRelease;
+  showcase: AssetRecord;
+  baseUrl?: string;
+}
+
+const {
+  product,
+  features,
+  latestRelease,
+  showcase,
+  baseUrl = import.meta.env.BASE_URL,
+} = Astro.props;
+---
+
+<Container as="section" size="xl">
+  <div class="branchline-stage page-experience">
+    <BranchlineNav sections={homeSections} />
+    <div class="branchline-content">
+      <GitTreeReveal sections={homeSections} />
+      <div class="page-section-stack">
+        <HeroSection product={product} baseUrl={baseUrl} />
+        <ProductShowcaseSection showcase={showcase} baseUrl={baseUrl} />
+        <FeatureGridSection features={features} />
+        <WorkflowPreviewSection />
+        <DownloadSection latestRelease={latestRelease} baseUrl={baseUrl} />
+        <OpenSourceSection product={product} />
+      </div>
+    </div>
+  </div>
+</Container>

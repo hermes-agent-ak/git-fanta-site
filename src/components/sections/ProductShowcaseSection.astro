@@ -1,0 +1,56 @@
+---
+import type { AssetRecord } from "../../content/assets";
+import { siteHref } from "../../lib/site-url";
+
+interface Props {
+  showcase: AssetRecord;
+  baseUrl?: string;
+}
+
+const { showcase, baseUrl = import.meta.env.BASE_URL } = Astro.props;
+const showcasePath = showcase.targetPath?.replace(/^public/, "");
+---
+
+<section
+  id="product-showcase"
+  class="page-section page-section--showcase"
+  aria-labelledby="product-showcase-heading"
+  data-experience-section
+>
+  <div class="section-heading-row">
+    <div>
+      <p class="eyebrow">Product / interface preview</p>
+      <h2 id="product-showcase-heading">A Git GUI with room to think</h2>
+    </div>
+    <span class="section-ref">refs/heads/feature/ui</span>
+  </div>
+
+  <figure class="showcase-frame">
+    {
+      showcase.status === "ready" && showcasePath ? (
+        <div class="showcase-frame__viewport">
+          <img
+            src={siteHref(showcasePath, baseUrl)}
+            alt={showcase.altText}
+            width="1536"
+            height="1024"
+            loading="eager"
+            decoding="async"
+          />
+        </div>
+      ) : (
+        <div
+          class="showcase-frame__fallback"
+          role="img"
+          aria-label="Git Fanta project showcase unavailable"
+        >
+          <span aria-hidden="true">git show --stat</span>
+          <strong>Product media is being prepared.</strong>
+        </div>
+      )
+    }
+    <figcaption>
+      Derived interface preview · title-bar path redacted.
+    </figcaption>
+  </figure>
+</section>

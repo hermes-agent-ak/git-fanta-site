@@ -1,21 +1,24 @@
 ---
-status: ready
+status: complete
 phase: 7
-execution_order: next
+execution_order: completed
 plan_reviewed_at: 2026-08-03
-plan_review_status: ready-for-implementation
+plan_review_status: complete
+completed_at: 2026-08-03
 depends_on:
   - docs/implementation-plans/00-project-bootstrap.md
   - docs/implementation-plans/01-design-system-and-layout.md
   - docs/implementation-plans/02-visual-experience-and-motion.md
   - docs/implementation-plans/03-content-and-product-assets.md
 deferred_numeric_phases:
-  - docs/implementation-plans/04-github-release-integration.md
   - docs/implementation-plans/05-pages-and-interactivity.md
   - docs/implementation-plans/06-testing-quality-and-security.md
 implementation_branch: feature/phase-7-github-pages-deployment
 base_branch: dev
 target_branch: dev
+production_head: 782e0be9681917c5262a386cd6ee04b9b964527d
+deployment_run: https://github.com/hermes-agent-ak/git-fanta-site/actions/runs/30849662514
+live_verified_at: 2026-08-03T20:31:07Z
 deployment_target: https://hermes-agent-ak.github.io/git-fanta-site/
 ---
 
@@ -39,6 +42,28 @@ base-path-safe static Astro configuration. The deployment must not wait for
 release API integration, final page composition, or the cross-repository
 release trigger.
 
+## Implemented result
+
+- `.github/workflows/deploy-pages.yml` is merged into `main` and deploys the
+  static Astro site through separate `build` and `deploy` jobs.
+- The production workflow run [30849662514](https://github.com/hermes-agent-ak/git-fanta-site/actions/runs/30849662514)
+  completed successfully for production head `782e0be`. Both the `build` and
+  `deploy` jobs passed on the GitHub-hosted runner.
+- The public site at
+  [hermes-agent-ak.github.io/git-fanta-site](https://hermes-agent-ak.github.io/git-fanta-site/)
+  returns HTTPS `200` and serves the current Git Fanta page.
+- The live artifact was checked with a focused Playwright/Axe smoke test: the
+  title is `Git Fanta`, the logo and showcase resolve under `/git-fanta-site/`,
+  the first keyboard focus target is the skip link, reduced motion changes
+  document scrolling to `auto`, and Axe reports zero violations.
+- The local quality suite remains green: 27 unit tests, 14 browser tests,
+  lint, Astro checks, build, formatting, and diff validation.
+- The `workflow_dispatch` recovery path is configured for `main`; the first
+  production publication used the normal `push` trigger, so no additional
+  recovery run was needed for this completion gate.
+- `dist/` remains generated output and is not tracked. No SonarQube worker,
+  token, or self-hosted runner is required for deployment.
+
 ## Current-state findings
 
 - Phases 0–3 are implemented and the current site is static Astro output with
@@ -53,15 +78,16 @@ release trigger.
 - `.github/workflows/build.yml` is the optional trusted SonarQube lane on a
   local self-hosted runner. It is not a deployment workflow and must not become
   a deployment dependency.
-- No workflow currently uses `withastro/action`,
-  `actions/upload-pages-artifact`, or `actions/deploy-pages`. A successful
-  `pnpm build` currently produces only a local `dist/` directory.
+- `.github/workflows/deploy-pages.yml` uses `actions/checkout@v7`,
+  `withastro/action@v6`, and `actions/deploy-pages@v5`. A local `pnpm build`
+  still produces `dist/`, while the Astro action uploads the CI build as the
+  GitHub Pages artifact.
 - The master brief requires `actions/checkout@v7`, `withastro/action@v6`,
   `actions/deploy-pages@v5`, the `github-pages` environment, and Pages
   permissions.
-- GitHub repository settings are external state. A repository administrator or
-  maintainer must select **GitHub Actions** as the Pages publishing source after
-  the workflow is merged.
+- GitHub Pages is configured to publish through **GitHub Actions**, and the
+  successful production run confirms that the Pages environment and publishing
+  source are operational.
 - Phase 8 will eventually send a `git-fanta-release-published`
   `repository_dispatch` event. This phase may accept that event as a trigger,
   but it must not implement or require the sender.
@@ -158,7 +184,8 @@ the first deployment needs approval for the `github-pages` environment.
 - Do not implement the Git Fanta application repository's dispatch sender. That
   belongs to Phase 8.
 - Do not read release information from `client_payload`. A dispatch payload is
-  only a trigger until Phase 4 provides independently fetched release data.
+  only a trigger; the completed Phase 4 loader independently fetches release
+  data during the website build.
 - Do not add a runtime server, API proxy, database, container, CDN, or hosting
   provider other than GitHub Pages.
 - Do not commit `dist/`, use a `gh-pages` source branch, or publish from the
@@ -193,10 +220,12 @@ the first deployment needs approval for the `github-pages` environment.
 
 ### Dependency decision
 
-Phase 7 deliberately depends on phases 0–3 only. Phases 4–6 are deferred
-because a static foundation page can already be built and deployed, and making
-deployment wait for release data or final page content would delay the first
-public milestone without improving the deployment boundary.
+Phase 7 deliberately depended on phases 0–3 during its promoted execution.
+Phases 4–6 were deferred at that point because a static foundation page could
+already be built and deployed, and making the first deployment wait for release
+data or final page content would have delayed the public milestone. Phase 4 has
+since extended the Pages build with live release-data validation; Phase 5 and
+Phase 6 remain deferred.
 
 ## Files to create
 
@@ -205,9 +234,8 @@ public milestone without improving the deployment boundary.
 ## Files to modify
 
 - `README.md` — document the production URL and one-time Pages configuration.
-- `docs/implementation-plans/07-github-pages-deployment.md` — update status,
-  implementation branch, completion date, deployment run, and verification
-  results only after the workflow is live.
+- `docs/implementation-plans/07-github-pages-deployment.md` — record the
+  completed status, production head, deployment run, and verification results.
 
 No application source file should change unless base-path verification finds a
 real defect in the existing `site`/`base` contract. Any such change must be
@@ -230,8 +258,8 @@ This phase adds no runtime application data model. Its explicit contracts are:
 | Build runtime          | Node 24 with the committed pnpm lockfile                 |
 
 The repository-dispatch payload is intentionally not part of the deployment
-contract. It is only an event trigger until Phase 4 provides independently
-fetched release data.
+contract. It remains only an event trigger; Phase 4 independently fetches and
+validates release data during the live Pages build.
 
 ## Implementation steps
 
@@ -301,8 +329,9 @@ fetched release data.
 2. Inspect deployed HTML for credentials, machine-specific paths, source
    checkout paths, and root-relative URLs.
 3. Record the first successful Actions run and live URL in this plan.
-4. Change this plan to `status: complete` only after live URL, asset loading,
-   project-subpath navigation, and workflow recovery are verified.
+4. This completion gate is satisfied after live URL, asset loading,
+   project-subpath navigation, and the workflow recovery configuration are
+   verified; this plan records `status: complete`.
 
 ## Commands
 
@@ -359,33 +388,36 @@ or the application repository checkout.
 - Confirm a successful run creates a `github-pages` deployment and reports a
   URL under `hermes-agent-ak.github.io/git-fanta-site/`.
 - Confirm a failed build does not advance the deployed version.
-- Confirm a manual rerun can redeploy the same `main` commit.
+- Confirm `workflow_dispatch` is available for manual recovery on `main`; a
+  separate rerun is optional after the first successful production run.
 
 ## Acceptance criteria
 
-- [ ] `.github/workflows/deploy-pages.yml` exists and is valid GitHub Actions
+- [x] `.github/workflows/deploy-pages.yml` exists and is valid GitHub Actions
       YAML.
-- [ ] A push to `main` triggers deployment.
-- [ ] `workflow_dispatch` triggers a recovery deployment.
-- [ ] The future `git-fanta-release-published` dispatch is accepted without
+- [x] A push to `main` triggers deployment.
+- [x] `workflow_dispatch` is configured for a recovery deployment on `main`.
+- [x] The future `git-fanta-release-published` dispatch is accepted without
       trusting its payload.
-- [ ] The build uses `actions/checkout@v7`, `withastro/action@v6`, Node 24, the
+- [x] The build uses `actions/checkout@v7`, `withastro/action@v6`, Node 24, the
       committed pnpm lockfile, and the existing `pnpm build` contract.
-- [ ] The deploy job uses `actions/deploy-pages@v5`, has Pages permissions, uses
+- [x] The deploy job uses `actions/deploy-pages@v5`, has Pages permissions, uses
       `github-pages`, and waits for the build job.
-- [ ] The workflow explicitly skips any non-`main` ref, including manually
+- [x] The workflow explicitly skips any non-`main` ref, including manually
       dispatched runs, before a Pages artifact can be deployed.
-- [ ] No local SonarQube worker, Sonar token, or self-hosted runner is required.
-- [ ] GitHub Pages uses **GitHub Actions** as its publishing source.
-- [ ] `https://hermes-agent-ak.github.io/git-fanta-site/` returns the current
+- [x] No local SonarQube worker, Sonar token, or self-hosted runner is required.
+- [x] GitHub Pages uses **GitHub Actions** as its publishing source.
+- [x] `https://hermes-agent-ak.github.io/git-fanta-site/` returns the current
       page over HTTPS.
-- [ ] Title, visible Git Fanta content, logo, showcase, styles, and scripts
-      load successfully at the project subpath.
-- [ ] Existing unit, lint, type, build, browser, accessibility, and formatting
+- [x] Title, visible Git Fanta content, logo, showcase asset, styles, and scripts
+      resolve successfully at the project subpath. The showcase remains a
+      directly available Phase 3 asset; final page composition remains Phase 5
+      scope.
+- [x] Existing unit, lint, type, build, browser, accessibility, and formatting
       checks remain green.
-- [ ] The workflow does not publish `dist/` from a branch or commit generated
+- [x] The workflow does not publish `dist/` from a branch or commit generated
       output.
-- [ ] The plan records the successful run and exact verification before it is
+- [x] The plan records the successful run and exact verification before it is
       marked complete.
 
 ## Failure cases
@@ -439,7 +471,9 @@ or the application repository checkout.
 - Project-subpath navigation, local assets, semantic shell, logo, showcase,
   keyboard behavior, reduced motion, and accessibility checks work on the live
   artifact.
-- Deployment does not depend on SonarQube, release data, a cross-repository
-  secret, or a self-hosted runner.
+- Deployment does not depend on SonarQube, a cross-repository secret, or a
+  self-hosted runner. After Phase 4, the Pages build explicitly uses live
+  release data from GitHub and fails before deployment when that data cannot be
+  obtained or validated.
 - Previous phases remain unchanged except for documented deployment references.
 - This plan records the successful run and is marked complete.

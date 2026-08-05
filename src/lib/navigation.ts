@@ -8,6 +8,12 @@ export const navigationItems = [
     currentWhen: ["/"],
   },
   {
+    label: "Download",
+    href: "/download/",
+    external: false,
+    currentWhen: ["/download/", "/download"],
+  },
+  {
     label: "Repository",
     href: "https://github.com/hermes-agent-ak/git-fanta",
     external: true,

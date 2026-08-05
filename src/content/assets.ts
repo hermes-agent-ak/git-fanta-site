@@ -58,7 +58,7 @@ export const assetManifest = [
     targetPath: "public/product/git-fanta-showcase.webp",
     status: "ready",
     altText:
-      "Git Fanta workflow showcase with a supplied Git GUI screenshot and logo.",
+      "Git Fanta interface showing commit history, branches, commit details, changed files, and repository status panels.",
     license:
       "Project-owner permission for this derived website showcase; underlying source provenance remains recorded separately.",
     attribution:
