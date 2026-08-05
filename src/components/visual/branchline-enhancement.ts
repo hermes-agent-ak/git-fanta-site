@@ -1,12 +1,11 @@
-type BranchlineRoot = Pick<Document, "getElementById" | "querySelector">;
-type BranchlineView = {
-  IntersectionObserver?:
-    | (new (
-        callback: IntersectionObserverCallback,
-        options?: IntersectionObserverInit,
-      ) => IntersectionObserver)
-    | undefined;
-};
+type BranchlineRoot = Pick<Document, "getElementById" | "querySelector"> &
+  Partial<Pick<Document, "addEventListener" | "documentElement">>;
+
+type BranchlineView = Partial<
+  Pick<Window, "addEventListener" | "requestAnimationFrame">
+>;
+
+const ACTIVE_LINE_GAP_PX = 8;
 
 export function initializeBranchlineEnhancement(
   root: BranchlineRoot,
@@ -23,7 +22,8 @@ export function initializeBranchlineEnhancement(
     .map((link) => root.getElementById(link.hash.slice(1)))
     .filter((section): section is HTMLElement => section !== null);
   const sectionIds = new Set(sections.map((section) => section.id));
-  let pendingNavigation: { id: string; expiresAt: number } | undefined;
+  let pendingNavigationId: string | undefined;
+  let updateScheduled = false;
 
   const setActive = (id: string) => {
     if (!sectionIds.has(id)) return;
@@ -40,52 +40,89 @@ export function initializeBranchlineEnhancement(
     });
   };
 
+  const isAtDocumentEnd = () => {
+    const documentElement = root.documentElement;
+    if (!documentElement) return false;
+
+    return (
+      documentElement.scrollTop + documentElement.clientHeight >=
+      documentElement.scrollHeight - 1
+    );
+  };
+
+  const resolveActiveSectionId = () => {
+    if (isAtDocumentEnd()) return sections.at(-1)?.id;
+
+    const activeLine =
+      Math.max(nav.getBoundingClientRect().bottom, 0) + ACTIVE_LINE_GAP_PX;
+    let activeSection = sections[0];
+
+    for (const section of sections) {
+      if (section.getBoundingClientRect().top > activeLine) break;
+      activeSection = section;
+    }
+
+    return activeSection?.id;
+  };
+
+  const synchronizeActiveSection = () => {
+    updateScheduled = false;
+    const activeId = resolveActiveSectionId();
+
+    if (!activeId) return;
+
+    if (pendingNavigationId && activeId !== pendingNavigationId) return;
+
+    pendingNavigationId = undefined;
+    setActive(activeId);
+  };
+
+  const scheduleSynchronization = () => {
+    if (updateScheduled) return;
+
+    if (view.requestAnimationFrame) {
+      updateScheduled = true;
+      view.requestAnimationFrame(synchronizeActiveSection);
+      return;
+    }
+
+    synchronizeActiveSection();
+  };
+
+  const releasePendingNavigation = () => {
+    pendingNavigationId = undefined;
+    scheduleSynchronization();
+  };
+
   links.forEach((link) => {
     link.addEventListener("click", () => {
       const id = link.hash.slice(1);
-      if (id) {
-        setActive(id);
-        pendingNavigation = {
-          id,
-          expiresAt: Date.now() + 1000,
-        };
-      }
+      if (!id) return;
+
+      pendingNavigationId = id;
+      setActive(id);
     });
   });
 
-  if (view.IntersectionObserver) {
-    const observer = new view.IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort(
-            (left, right) => right.intersectionRatio - left.intersectionRatio,
-          )[0];
+  root.addEventListener?.("scroll", scheduleSynchronization, {
+    passive: true,
+  });
+  root.addEventListener?.("scrollend", releasePendingNavigation, {
+    passive: true,
+  });
+  root.addEventListener?.("wheel", releasePendingNavigation, {
+    passive: true,
+  });
+  root.addEventListener?.("touchstart", releasePendingNavigation, {
+    passive: true,
+  });
+  view.addEventListener?.("resize", scheduleSynchronization, {
+    passive: true,
+  });
 
-        if (!visible) return;
-
-        if (pendingNavigation) {
-          if (Date.now() < pendingNavigation.expiresAt) {
-            if (visible.target.id !== pendingNavigation.id) return;
-          }
-
-          pendingNavigation = undefined;
-        }
-
-        setActive(visible.target.id);
-      },
-      { rootMargin: "-20% 0px -55% 0px", threshold: [0, 0.25, 0.6] },
-    );
-
-    sections.forEach((section) => observer.observe(section));
-  }
+  synchronizeActiveSection();
 }
 
 if (typeof document !== "undefined") {
-  initializeBranchlineEnhancement(document, {
-    IntersectionObserver:
-      typeof IntersectionObserver === "undefined"
-        ? undefined
-        : IntersectionObserver,
-  });
+  initializeBranchlineEnhancement(document, window);
 }

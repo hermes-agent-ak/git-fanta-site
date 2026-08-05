@@ -4,11 +4,16 @@ import { initializeBranchlineEnhancement } from "../../src/components/visual/bra
 type TestLink = {
   hash: string;
   dataset: Record<string, string>;
-  classList: { toggle: ReturnType<typeof vi.fn> };
   setAttribute: ReturnType<typeof vi.fn>;
   removeAttribute: ReturnType<typeof vi.fn>;
   addEventListener: ReturnType<typeof vi.fn>;
   triggerClick: () => void;
+};
+
+type TestSection = {
+  id: string;
+  top: number;
+  getBoundingClientRect: () => { top: number };
 };
 
 function createLink(id: string): TestLink {
@@ -16,7 +21,6 @@ function createLink(id: string): TestLink {
   const link: TestLink = {
     hash: `#${id}`,
     dataset: {},
-    classList: { toggle: vi.fn() },
     setAttribute: vi.fn(),
     removeAttribute: vi.fn(),
     addEventListener: vi.fn((_event, handler: () => void) => {
@@ -29,114 +33,147 @@ function createLink(id: string): TestLink {
 }
 
 function createRoot(ids: string[]) {
+  const listeners = new Map<string, () => void>();
   const links = ids.map(createLink);
-  const sections = ids.map((id) => ({ id }));
+  const sections: TestSection[] = ids.map((id, index) => {
+    const section = {
+      id,
+      top: 240 + index * 700,
+      getBoundingClientRect: () => ({ top: section.top }),
+    };
+
+    return section;
+  });
   const nav = {
     querySelectorAll: vi.fn(() => links),
-    querySelector: vi.fn(() => null),
-    addEventListener: vi.fn(),
+    getBoundingClientRect: vi.fn(() => ({ bottom: 200 })),
+  };
+  const documentElement = {
+    scrollTop: 0,
+    clientHeight: 900,
+    scrollHeight: 3000,
   };
   const root = {
     querySelector: vi.fn(() => nav),
     getElementById: vi.fn((id: string) =>
       sections.find((section) => section.id === id),
     ),
+    addEventListener: vi.fn((event: string, handler: () => void) => {
+      listeners.set(event, handler);
+    }),
+    documentElement,
+  };
+  const view = {
+    requestAnimationFrame: vi.fn((callback: () => void) => {
+      callback();
+      return 1;
+    }),
+    addEventListener: vi.fn(),
   };
 
-  return { links, root, sections };
+  return {
+    documentElement,
+    links,
+    root,
+    sections,
+    trigger: (event: string) => listeners.get(event)?.(),
+    view,
+  };
 }
 
 describe("branchline enhancement", () => {
-  it("synchronizes one active link after a click and an observed section", () => {
-    const { links, root, sections } = createRoot(["foundation", "motion"]);
-    let observerCallback: IntersectionObserverCallback | undefined;
-    vi.useFakeTimers();
+  it("advances monotonically when section tops cross the active line", () => {
+    const { links, root, sections, trigger, view } = createRoot([
+      "hero",
+      "showcase",
+      "features",
+    ]);
 
-    class TestObserver {
-      constructor(callback: IntersectionObserverCallback) {
-        observerCallback = callback;
-      }
+    initializeBranchlineEnhancement(root as never, view as never);
+    expect(links[0]!.dataset.active).toBe("true");
 
-      observe = vi.fn();
-    }
+    sections[0]!.top = -480;
+    sections[1]!.top = 220;
+    trigger("scroll");
+    expect(links[0]!.dataset.active).toBe("true");
+    expect(links[1]!.dataset.active).toBe("false");
 
-    try {
-      initializeBranchlineEnhancement(
-        root as never,
-        {
-          IntersectionObserver: TestObserver,
-        } as never,
-      );
+    sections[1]!.top = 208;
+    trigger("scroll");
+    expect(links[1]!.dataset.active).toBe("true");
+    expect(links[0]!.dataset.active).toBe("false");
 
-      links[1]!.triggerClick();
-      expect(links[0]!.dataset.active).toBe("false");
-      expect(links[1]!.dataset.active).toBe("true");
-      expect(links[1]!.setAttribute).toHaveBeenCalledWith(
-        "aria-current",
-        "location",
-      );
-
-      vi.advanceTimersByTime(1001);
-      observerCallback?.(
-        [
-          {
-            isIntersecting: true,
-            intersectionRatio: 1,
-            target: sections[0],
-          } as IntersectionObserverEntry,
-        ],
-        {} as IntersectionObserver,
-      );
-
-      expect(links[0]!.dataset.active).toBe("true");
-      expect(links[1]!.dataset.active).toBe("false");
-      expect(links[1]!.removeAttribute).toHaveBeenCalledWith("aria-current");
-    } finally {
-      vi.useRealTimers();
-    }
+    sections[1]!.top = -492;
+    sections[2]!.top = 208;
+    trigger("scroll");
+    expect(links[2]!.dataset.active).toBe("true");
+    expect(links[1]!.dataset.active).toBe("false");
   });
 
-  it("keeps click synchronization when IntersectionObserver is unavailable", () => {
-    const { links, root } = createRoot(["foundation", "motion"]);
+  it("holds a clicked target until scrolling reaches it", () => {
+    const { links, root, sections, trigger, view } = createRoot([
+      "hero",
+      "showcase",
+    ]);
 
-    initializeBranchlineEnhancement(
-      root as never,
-      {
-        IntersectionObserver: undefined,
-      } as never,
-    );
+    initializeBranchlineEnhancement(root as never, view as never);
+    links[1]!.triggerClick();
+    expect(links[1]!.dataset.active).toBe("true");
 
+    sections[0]!.top = -100;
+    sections[1]!.top = 600;
+    trigger("scroll");
+    expect(links[1]!.dataset.active).toBe("true");
+
+    sections[1]!.top = 208;
+    trigger("scroll");
+    expect(links[1]!.dataset.active).toBe("true");
+
+    sections[0]!.top = 208;
+    sections[1]!.top = 908;
+    trigger("scroll");
+    expect(links[0]!.dataset.active).toBe("true");
+  });
+
+  it("activates the final section at the document end", () => {
+    const { documentElement, links, root, trigger, view } = createRoot([
+      "hero",
+      "showcase",
+      "open-source",
+    ]);
+
+    initializeBranchlineEnhancement(root as never, view as never);
+    documentElement.scrollTop = 2100;
+    trigger("scroll");
+
+    expect(links[2]!.dataset.active).toBe("true");
+    expect(links[0]!.dataset.active).toBe("false");
+  });
+
+  it("releases click synchronization after interrupted scrolling", () => {
+    const { links, root, sections, trigger, view } = createRoot([
+      "hero",
+      "showcase",
+    ]);
+
+    initializeBranchlineEnhancement(root as never, view as never);
+    links[1]!.triggerClick();
+    sections[0]!.top = 208;
+    sections[1]!.top = 908;
+    trigger("wheel");
+
+    expect(links[0]!.dataset.active).toBe("true");
+    expect(links[1]!.dataset.active).toBe("false");
+  });
+
+  it("keeps click synchronization when animation frames are unavailable", () => {
+    const { links, root } = createRoot(["hero", "showcase"]);
+
+    initializeBranchlineEnhancement(root as never, {});
     links[1]!.triggerClick();
 
     expect(links[1]!.dataset.active).toBe("true");
     expect(links[0]!.dataset.active).toBe("false");
-  });
-
-  it("does not move focus or control responsive disclosures after a click", () => {
-    const { links, root } = createRoot(["foundation", "motion"]);
-    const focus = vi.fn();
-    const disclosure = { open: true };
-    const nav = root.querySelector() as unknown as {
-      querySelector: ReturnType<typeof vi.fn>;
-    };
-
-    nav.querySelector.mockImplementation((selector: string) => {
-      if (selector === ".branchline-nav__disclosure") return disclosure;
-      if (selector === "summary") return { focus };
-      return null;
-    });
-
-    initializeBranchlineEnhancement(
-      root as never,
-      {
-        IntersectionObserver: undefined,
-        matchMedia: () => ({ matches: true }),
-      } as never,
-    );
-    links[1]!.triggerClick();
-
-    expect(disclosure.open).toBe(true);
-    expect(focus).not.toHaveBeenCalled();
   });
 
   it("does nothing when the navigation root is absent", () => {
@@ -145,7 +182,7 @@ describe("branchline enhancement", () => {
       getElementById: vi.fn(),
     };
 
-    initializeBranchlineEnhancement(root as never, {} as never);
+    initializeBranchlineEnhancement(root as never, {});
 
     expect(root.querySelector).toHaveBeenCalledWith("[data-branchline-nav]");
   });

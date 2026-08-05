@@ -1518,6 +1518,7 @@ button:disabled {
 
 .download-selector__option {
   display: flex;
+  position: relative;
   gap: 0.65rem;
   align-items: start;
   min-height: 3.4rem;
@@ -1539,13 +1540,23 @@ button:disabled {
   accent-color: var(--gf-color-accent-orange);
 }
 
-.download-selector__option strong,
+.download-selector__option label,
 .download-selector__option small {
   display: block;
 }
 
-.download-selector__option strong {
+.download-selector__option label {
+  min-width: 0;
+  flex: 1;
   color: var(--gf-color-foreground-primary);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.download-selector__option label::after {
+  position: absolute;
+  inset: 0;
+  content: "";
 }
 
 .download-selector__option small {
@@ -1554,6 +1565,7 @@ button:disabled {
   color: var(--gf-color-foreground-subtle);
   font-family: var(--gf-font-mono);
   font-size: 0.7rem;
+  font-weight: 400;
 }
 
 .download-selector__status {

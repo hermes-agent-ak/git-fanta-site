@@ -3,9 +3,9 @@ import type { ReactElement } from "react";
 
 import type { DownloadAssetView } from "../../lib/downloads";
 
-export interface DownloadSelectorProps {
+export type DownloadSelectorProps = Readonly<{
   assets: readonly DownloadAssetView[];
-}
+}>;
 
 function availableAssets(assets: readonly DownloadAssetView[]) {
   return assets.filter((asset) => asset.availability === "available");
@@ -26,26 +26,29 @@ export default function DownloadSelector({
       <fieldset>
         <legend>Select a platform or artifact</legend>
         <div className="download-selector__options">
-          {available.map((asset) => (
-            <label className="download-selector__option" key={asset.id}>
-              <input
-                type="radio"
-                name="download-artifact"
-                value={asset.id ?? ""}
-                checked={asset.id === selectedId}
-                onChange={() => setSelectedId(asset.id)}
-              />
-              <span>
-                <strong>
-                  {asset.platformLabel} / {asset.artifactLabel}
-                </strong>
-                <small>
-                  {asset.fileName} · {asset.sizeLabel}
-                  {asset.recommended ? " · Recommended" : ""}
-                </small>
-              </span>
-            </label>
-          ))}
+          {available.map((asset, index) => {
+            const inputId = `download-artifact-${asset.id ?? index}`;
+
+            return (
+              <div className="download-selector__option" key={asset.id}>
+                <input
+                  id={inputId}
+                  type="radio"
+                  name="download-artifact"
+                  value={asset.id ?? ""}
+                  checked={asset.id === selectedId}
+                  onChange={() => setSelectedId(asset.id)}
+                />
+                <label htmlFor={inputId}>
+                  Download {asset.platformLabel} / {asset.artifactLabel}
+                  <small>
+                    {asset.fileName} · {asset.sizeLabel}
+                    {asset.recommended ? " · Recommended" : ""}
+                  </small>
+                </label>
+              </div>
+            );
+          })}
         </div>
       </fieldset>
 

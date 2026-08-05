@@ -41,6 +41,58 @@ test.describe("Branchline visual experience", () => {
     await expect(page.locator('[data-visual="git-tree"]')).toBeVisible();
   });
 
+  test("keeps desktop route transitions ordered during natural scrolling", async ({
+    page,
+  }) => {
+    const expectedRoute = [
+      "#hero",
+      "#product-showcase",
+      "#features",
+      "#workflow",
+      "#download",
+      "#open-source",
+    ];
+
+    for (const width of [1024, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(basePath);
+      await page.evaluate(() => {
+        document.documentElement.style.scrollBehavior = "auto";
+      });
+
+      const maximumScroll = await page.evaluate(
+        () => document.documentElement.scrollHeight - window.innerHeight,
+      );
+      const scrollPositions: number[] = [];
+      for (let position = 0; position < maximumScroll; position += 40) {
+        scrollPositions.push(position);
+      }
+      scrollPositions.push(maximumScroll);
+
+      const transitions: string[] = [];
+      for (const position of scrollPositions) {
+        await page.evaluate((top) => window.scrollTo(0, top), position);
+        await page.evaluate(
+          () =>
+            new Promise<void>((resolve) => {
+              requestAnimationFrame(() => resolve());
+            }),
+        );
+
+        const activeHref = await page
+          .locator('[data-branchline-nav] [data-active="true"]')
+          .getAttribute("href");
+        if (activeHref && transitions.at(-1) !== activeHref) {
+          transitions.push(activeHref);
+        }
+      }
+
+      expect(transitions, `route transitions at ${width}px`).toEqual(
+        expectedRoute,
+      );
+    }
+  });
+
   test("renders a decorative graph that does not carry semantic content", async ({
     page,
   }) => {
@@ -216,7 +268,33 @@ test.describe("Branchline visual experience", () => {
         await link.focus();
         await page.keyboard.press("Enter");
       }
-      await page.waitForTimeout(1100);
+
+      await expect
+        .poll(
+          async () =>
+            page.evaluate(() => {
+              const header = document.querySelector("header")!;
+              const branchline = document.querySelector<HTMLElement>(
+                "[data-branchline-nav]",
+              )!;
+              const metadata = document.querySelector<HTMLElement>(
+                "#features .section-heading-row",
+              )!;
+              const stickyElement =
+                getComputedStyle(header).position === "sticky"
+                  ? header
+                  : branchline;
+              const stickyBottom = stickyElement.getBoundingClientRect().bottom;
+              const metadataTop = metadata.getBoundingClientRect().top;
+
+              return (
+                metadataTop >= stickyBottom + 8 &&
+                metadataTop < window.innerHeight / 2
+              );
+            }),
+          { message: `anchor placement at ${width}px` },
+        )
+        .toBe(true);
 
       const geometry = await page.evaluate(() => {
         const header = document.querySelector("header")!;
