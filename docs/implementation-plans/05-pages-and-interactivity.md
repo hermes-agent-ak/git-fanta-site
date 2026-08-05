@@ -94,7 +94,7 @@ implementation progress section records what is already present now.
 - The implemented SiteHeader renders all six primary links at every width. At
   320 CSS pixels it wraps into two short rows instead of providing the expected
   conventional global hamburger navigation.
-- The uncommitted mobile Branchline follow-up turns local page orientation into
+- The interim mobile Branchline follow-up turned local page orientation into
   a second sticky disclosure. With JavaScript disabled it starts open as an
   overlay, and its click handler moves focus back to the summary.
 - The 768 CSS-pixel breakpoint switches to the six-column desktop Branchline too
@@ -674,9 +674,11 @@ git diff --check
 `pnpm add` must update `package.json` and `pnpm-lock.yaml`. Extend the existing
 `format` and `format:check` script inputs to include `docs/design` and the
 implementation-plan files touched by Phase 5, or run the equivalent targeted
-Prettier check explicitly. Lighthouse,
-coverage, SonarQube, dependency-review, and browser-matrix commands remain
-Phase 6 work.
+Prettier check explicitly. Lighthouse, broader performance/security policy,
+dependency review, and the expanded browser matrix remain Phase 6 work. The
+existing SonarQube Quality Gate and LCOV coverage import remain required
+regression checks for Phase 5 source or test changes; do not weaken their
+thresholds or exclusions.
 
 ## Testing steps
 
@@ -732,8 +734,9 @@ Phase 6 work.
 ## Implementation progress
 
 The implementation is in progress on
-`feature/phase-5-pages-and-interactivity`. The following scope is now present
-in the working tree and remains reviewable before commit:
+`feature/phase-5-pages-and-interactivity`. The current follow-up is committed
+and pushed at `517cb71` (`fix(site): stabilize route tracking and download
+selection`). The following scope is present on that branch:
 
 - page-experience contract, final homepage section models, source-backed feature
   content, and the serializable release/download view model;
@@ -746,6 +749,14 @@ in the working tree and remains reviewable before commit:
 - all responsive-navigation corrections are implemented: compact layouts omit
   Branchline, the mobile disclosure is a full-width in-flow extension of the
   header, and desktop SiteHeader and Branchline form one opaque sticky stack.
+- Desktop Branchline now resolves its active item from the last section that
+  crosses an 8px activation line below the sticky stack. Passive scroll/resize
+  listeners schedule at most one update per frame; a clicked route remains
+  active until its destination is reached, scrolling is interrupted, or the
+  document end selects the final section.
+- The download selector now has immutable props, explicit radio/label
+  associations, and a full-card click target. The associated fixed-delay test
+  now waits for observable anchor geometry.
 
 Completed verification so far: `pnpm check`, `pnpm test:unit`, fixture build,
 the dedicated pages/downloads/metadata E2E suites, the full fixture E2E suite,
@@ -767,6 +778,14 @@ below 64rem while retaining the product identity and complete desktop footer
 navigation. The product-showcase follow-up isolates the redacted interface crop
 from the ready derived media, excludes its logo and orange decorative frame, and
 passed visual review at 320, 768, and 1440 CSS pixels.
+The final route-tracking follow-up reproduced and removed the former desktop
+reversions (`Hero → Showcase → Hero` and equivalent later jumps). It adds unit
+coverage for monotonic crossing, pending click state, interruption, and
+document-end handling plus a browser regression that requires the exact ordered
+route at 1024 and 1440 CSS pixels. The combined final state passed 58 unit
+tests, the 12-test visual browser suite, build/type/lint/format/diff checks,
+and the local SonarQube Quality Gate with 0 new violations, 85.0% new-code
+coverage, and 2.61% new duplicated-line density.
 
 ## Acceptance criteria
 
@@ -812,6 +831,9 @@ passed visual review at 320, 768, and 1440 CSS pixels.
 - [x] Desktop Branchline labels and conceptual refs remain fully visible;
       same-page navigation never moves focus and the complete sticky stack does
       not obscure section metadata or headings.
+- [x] Desktop active-route state advances monotonically through every homepage
+      section at 1024px and 1440px; a clicked target does not regress before it
+      is reached, and the final section becomes active at document end.
 - [ ] Canonical, title, description, OG, social image, favicon, robots, sitemap,
       and conservative SoftwareApplication JSON-LD are base-path-safe.
 - [ ] Pages work at 320/375/640/768/1024/1280/1440 CSS px, 200% and 400%
@@ -915,8 +937,9 @@ with the `plan-review` workflow:
 
 The Phase 5 scope is executable after the current Phase 4 head. Phase 6 owns
 the final quality/security/performance gate and Phase 8 remains correctly
-deferred. The responsive-navigation follow-up passed its staged review; pushing
-remains subject to explicit user authorization.
+deferred. The responsive-navigation and route-tracking follow-ups passed review
+and were pushed to the feature branch at `517cb71`; broader Phase 5 acceptance
+remains before the phase is marked complete.
 
 ## References and legal scope note
 

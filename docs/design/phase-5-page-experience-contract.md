@@ -112,17 +112,26 @@ Responsive contract:
 
 Motion and fallback:
 
-- `branchline-enhancement.ts` may update only active link state through
-  `IntersectionObserver`; if unavailable, the server-rendered first state and
-  ordinary anchor clicks remain usable.
+- `branchline-enhancement.ts` may update only active link state. It derives the
+  active item from the last section whose top has crossed a line immediately
+  below the sticky stack; passive scroll and resize events are coalesced to one
+  `requestAnimationFrame` update. This avoids ratio-threshold reversions when
+  adjacent sections have different heights.
+- A clicked anchor remains active until its target reaches that line. A native
+  `scrollend` event or user scroll intent releases the pending state, and the
+  final section becomes active at the document end.
+- If scripting is unavailable, the server-rendered first state and ordinary
+  anchor clicks remain usable.
 - Active-state enhancement is not required to reach content.
 - Anchor activation never closes a disclosure or moves focus.
 - Compact layouts remain complete when Branchline is hidden because the
   component contains no unique content or action.
 - No runtime data is fetched and no decorative JS is required.
 
-Budget: no additional JavaScript beyond the existing small observer module;
-all local-route links remain visible and usable with scripting disabled.
+Budget: no additional JavaScript beyond one small event-driven scrollspy. It
+must use passive listeners and at most one scheduled update per frame; no
+continuous animation frame loop, polling timer, or scroll hijacking is allowed.
+All local-route links remain visible and usable with scripting disabled.
 
 ### Git Tree Reveal
 

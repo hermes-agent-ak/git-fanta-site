@@ -905,8 +905,11 @@ Update the Git Fanta release workflow to dispatch a website rebuild after a rele
   `docs/implementation-plans/05-pages-and-interactivity.md`; the plan was
   manually reviewed on 2026-08-04 after the configured review skill source was
   unavailable. The current implementation passes type, unit, fixture E2E,
-  Axe, lint, formatting, base-path, and live-build verification; commit review
-  remains pending explicit authorization.
+  Axe, lint, formatting, base-path, live-build, and local SonarQube Quality
+  Gate verification. Its responsive-navigation, accessible download-selector,
+  and deterministic desktop route-tracking follow-ups are committed and pushed
+  at `517cb71`; Phase 5 remains in implementation until the remaining
+  acceptance criteria are closed.
 - Phases 6 and 8 remain planned after Phase 5. Phase 8 must remain after
   deployment because it extends the application release workflow only after
   the website has a live destination.
