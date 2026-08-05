@@ -1,0 +1,59 @@
+---
+
+---
+
+<section
+  id="workflow"
+  class="page-section page-section--workflow"
+  aria-labelledby="workflow-heading"
+  data-experience-section
+>
+  <div class="section-heading-row">
+    <div>
+      <p class="eyebrow">Workflow / graph view</p>
+      <h2 id="workflow-heading">See the history behind the change</h2>
+    </div>
+    <span class="section-ref">refs/heads/feature/ui</span>
+  </div>
+  <div class="workflow-preview">
+    <div class="workflow-preview__graph" aria-hidden="true">
+      <svg
+        class="workflow-preview__paths"
+        viewBox="0 0 240 240"
+        preserveAspectRatio="none"
+        focusable="false"
+      >
+        <path
+          class="workflow-preview__path workflow-preview__path--main"
+          d="M168 24 C168 72 168 120 168 168 C168 184 168 200 168 216"></path>
+        <path
+          class="workflow-preview__path workflow-preview__path--branch"
+          d="M168 72 C168 88 216 88 216 120 C216 136 216 152 216 168 C216 192 168 192 168 216"
+        ></path>
+      </svg>
+      <span class="workflow-preview__node workflow-preview__node--one"></span>
+      <span class="workflow-preview__node workflow-preview__node--two"></span>
+      <span class="workflow-preview__node workflow-preview__node--main-commit"
+      ></span>
+      <span class="workflow-preview__node workflow-preview__node--three"></span>
+      <span class="workflow-preview__node workflow-preview__node--merge"></span>
+      <span class="workflow-preview__node workflow-preview__node--branch-one"
+      ></span>
+      <span class="workflow-preview__node workflow-preview__node--branch-two"
+      ></span>
+    </div>
+    <div class="workflow-preview__copy">
+      <p>
+        Git Fanta's documented DAG view brings git log's powerful features into
+        a graphical interface. Revision ranges, commit diffs, context-menu
+        actions, and shortcuts stay close to the history they describe.
+      </p>
+      <p class="workflow-preview__diff">
+        <strong aria-hidden="true">+</strong>
+        <span
+          >history becomes a place to work, not just a record to inspect</span
+        >
+      </p>
+    </div>
+  </div>
+</section>

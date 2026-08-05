@@ -1,0 +1,27 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import NotFoundPage from "../components/pages/NotFoundPage.astro";
+import SiteFooter from "../components/site/SiteFooter.astro";
+import SiteHeader from "../components/site/SiteHeader.astro";
+import { createPageMetadata } from "../lib/metadata";
+
+const baseUrl = import.meta.env.BASE_URL;
+const metadata = createPageMetadata({
+  title: "Page not found — Git Fanta",
+  description: "The requested Git Fanta page could not be found.",
+  canonicalPath: "/404.html",
+  baseUrl,
+  site: Astro.site,
+});
+---
+
+<BaseLayout
+  title={metadata.title}
+  description={metadata.description}
+  metadata={metadata}
+  mainClass="site-main"
+>
+  <SiteHeader slot="header" baseUrl={baseUrl} />
+  <NotFoundPage baseUrl={baseUrl} />
+  <SiteFooter slot="footer" baseUrl={baseUrl} />
+</BaseLayout>

@@ -25,9 +25,13 @@ describe("navigation model", () => {
     );
   });
 
-  it("does not expose a download destination before the download phase", () => {
-    expect(navigationItems.some((item) => /download/i.test(item.label))).toBe(
-      false,
+  it("resolves the internal download destination through the base path", () => {
+    const download = navigationItems.find((item) => item.label === "Download");
+
+    expect(download).toBeDefined();
+    expect(download?.external).toBe(false);
+    expect(navigationHref(download!, "/git-fanta-site/")).toBe(
+      "/git-fanta-site/download/",
     );
   });
 });

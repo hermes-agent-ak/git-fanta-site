@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">Git Fanta — The highly caffeinated Git GUI</title>
+  <desc id="description">A Git Fanta social preview with a branch and commit graph.</desc>
+  <rect width="1200" height="630" fill="#0f0e0d"/>
+  <path d="M0 540h1200" stroke="#4e423a" stroke-width="2"/>
+  <path d="M120 540V178h210v110h220v252" fill="none" stroke="#f28c28" stroke-width="6"/>
+  <path d="M330 288l120 100h100" fill="none" stroke="#52d273" stroke-width="6"/>
+  <circle cx="120" cy="178" r="16" fill="#f28c28"/>
+  <circle cx="330" cy="288" r="16" fill="#52d273"/>
+  <circle cx="450" cy="388" r="16" fill="#f28c28"/>
+  <circle cx="550" cy="540" r="16" fill="#52d273"/>
+  <text x="690" y="250" fill="#faf7f2" font-family="ui-sans-serif,system-ui,sans-serif" font-size="72" font-weight="800">Git Fanta</text>
+  <text x="694" y="320" fill="#f28c28" font-family="ui-monospace,SFMono-Regular,monospace" font-size="28">THE HIGHLY CAFFEINATED GIT GUI</text>
+  <text x="694" y="390" fill="#c8bbb0" font-family="ui-sans-serif,system-ui,sans-serif" font-size="26">A clearer route through everyday Git work.</text>
+</svg>

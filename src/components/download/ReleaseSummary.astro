@@ -1,0 +1,45 @@
+---
+import type { DownloadPageModel } from "../../lib/downloads";
+
+interface Props {
+  model: DownloadPageModel;
+}
+
+const { model } = Astro.props;
+const publishedDate = new Intl.DateTimeFormat("en", {
+  dateStyle: "long",
+  timeZone: "UTC",
+}).format(new Date(model.publishedAt));
+---
+
+<section class="release-summary" aria-labelledby="release-summary-heading">
+  <div>
+    <p class="eyebrow">Latest published release</p>
+    <h2 id="release-summary-heading">{model.title}</h2>
+    <p class="release-summary__version">v{model.version}</p>
+  </div>
+  <dl class="release-summary__details">
+    <div>
+      <dt>Published</dt>
+      <dd>{publishedDate}</dd>
+    </div>
+    <div>
+      <dt>Checksums</dt>
+      <dd>
+        {
+          model.checksum?.availability === "available"
+            ? "SHA256SUMS available"
+            : "Not published"
+        }
+      </dd>
+    </div>
+  </dl>
+  <a
+    class="release-summary__github"
+    href={model.releaseUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    View release notes on GitHub
+  </a>
+</section>

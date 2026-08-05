@@ -1,0 +1,41 @@
+---
+import type { DownloadAssetView } from "../../lib/downloads";
+
+interface Props {
+  asset: DownloadAssetView;
+}
+
+const { asset } = Astro.props;
+const isAvailable = asset.availability === "available" && asset.downloadUrl;
+---
+
+<div
+  class:list={[
+    "download-asset-link",
+    { "download-asset-link--recommended": asset.recommended },
+  ]}
+>
+  <div>
+    <p class="download-asset-link__title">
+      {asset.platformLabel} / {asset.artifactLabel}
+      {asset.recommended && <span class="download-badge">Recommended</span>}
+    </p>
+    <p class="download-asset-link__meta">
+      {asset.fileName ?? "Not published in this release"} · {asset.sizeLabel}
+    </p>
+  </div>
+  {
+    isAvailable ? (
+      <a
+        href={asset.downloadUrl!}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Download ${asset.platformLabel} ${asset.artifactLabel} ${asset.fileName}`}
+      >
+        Download
+      </a>
+    ) : (
+      <span class="download-asset-link__unavailable">Unavailable</span>
+    )
+  }
+</div>

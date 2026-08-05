@@ -35,8 +35,9 @@ The active Branchline state has one deliberate owner at each boundary:
 2. `resolveExperienceSectionId` validates the server-rendered initial state and
    falls back to the first known section when a caller supplies an invalid ID.
 3. `data-active` is the single client-side visual state consumed by CSS. The
-   enhancement updates it for the clicked or observed section and never
-   maintains a second active CSS class.
+   enhancement updates it for the clicked section or the last section that has
+   crossed the sticky-stack activation line, and never maintains a second active
+   CSS class.
 4. `aria-current="location"` mirrors that same state for assistive technology;
    exactly one active link is enforced by the browser contract test.
 
@@ -49,9 +50,13 @@ server-rendered first node remains a complete navigation fallback.
 ### Normal anchors remain the source of truth
 
 Branchline links point to real section IDs and expose `aria-current="location"`
-for the initial active node. A native `details` disclosure provides the mobile
-presentation without requiring JavaScript. The page never hijacks wheel input,
-forces scroll snapping, or hides the route behind hover.
+for the initial active node. On desktop, a passive, frame-coalesced scrollspy
+selects the last section to cross the sticky-stack activation line; this keeps
+the route monotonic even when adjacent sections have very different heights.
+Clicking a link holds its state until the destination is reached or the reader
+interrupts scrolling. Compact layouts omit Branchline in favour of the global
+header and normal document order. The page never hijacks wheel input, forces
+scroll snapping, or hides the route behind hover.
 
 ### CSS-first progressive reveal
 
@@ -74,8 +79,10 @@ meaning.
   complicates accessibility, and is unnecessary for a small branch grammar.
 - A full animation library was rejected because CSS timelines and short
   transitions cover the intended motion vocabulary with less shipped code.
-- Scroll event loops and continuous `requestAnimationFrame` were rejected to
-  protect low-power devices and avoid main-thread work during navigation.
+- An unbounded scroll event loop and continuous `requestAnimationFrame` were
+  rejected to protect low-power devices. The active-state enhancement instead
+  uses passive scroll events and schedules no more than one calculation per
+  frame; it does not animate or poll.
 - A custom cursor, autoplay video, audio, and large animated backgrounds were
   rejected because they add visual noise and weight without improving the
   information architecture.
@@ -100,9 +107,10 @@ and [web.dev's animation-performance guidance](https://web.dev/articles/animatio
 
 ## Review record
 
-- Layout review widths: 320px, 768px, and 1440px.
-- Automated coverage: unit model tests, static build, browser anchor and
-  disclosure tests, 320px overflow check, Axe coverage, and reduced-motion
-  verification.
+- Layout review widths: 320px, 768px, 1024px, and 1440px.
+- Automated coverage: unit model tests, ordered desktop-scroll regression at
+  1024px and 1440px, static build, browser anchor and disclosure tests, 320px
+  overflow check, Axe coverage, and reduced-motion verification.
 - Performance boundary: no new dependency, no remote asset, no client
-  directive, no canvas/WebGL, and no continuous scroll handler.
+  directive, no canvas/WebGL, and no continuous animation-frame or polling
+  loop.

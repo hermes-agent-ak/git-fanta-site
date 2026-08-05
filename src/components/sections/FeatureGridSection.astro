@@ -1,0 +1,40 @@
+---
+import type { FeatureContent } from "../../content/features";
+
+interface Props {
+  features: readonly FeatureContent[];
+}
+
+const { features } = Astro.props;
+---
+
+<section
+  id="features"
+  class="page-section"
+  aria-labelledby="features-heading"
+  data-experience-section
+>
+  <div class="section-heading-row">
+    <div>
+      <p class="eyebrow">Core features / source-backed</p>
+      <h2 id="features-heading">The everyday Git surface, made visible</h2>
+    </div>
+    <span class="section-ref">refs/heads/feature/ui</span>
+  </div>
+  <div class="feature-grid">
+    {
+      features.map((feature, index) => (
+        <article
+          class:list={["feature-card", `feature-card--${feature.tone}`]}
+          data-feature-id={feature.id}
+        >
+          <div class="feature-card__marker" aria-hidden="true">
+            {String(index + 1).padStart(2, "0")}
+          </div>
+          <h3>{feature.title}</h3>
+          <p>{feature.description}</p>
+        </article>
+      ))
+    }
+  </div>
+</section>
